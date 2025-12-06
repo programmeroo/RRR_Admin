@@ -1,0 +1,312 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Workflows{% endblock %}
+{% block page_title %}Workflow Management{% endblock %}
+
+{% block content %}
+
+<!-- Workflow Status Panel -->
+<div class="glass-panel mb-4 {% if workflow_status.running %}border-warning{% endif %}">
+  <div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="mb-0 d-flex align-items-center gap-2">
+        <i class="bi bi-activity text-info"></i> Workflow Status
+      </h5>
+      {% if workflow_status.running %}
+      <span class="badge bg-warning text-dark animate-pulse">RUNNING</span>
+      {% else %}
+      <span class="badge bg-secondary">IDLE</span>
+      {% endif %}
+    </div>
+
+    {% if workflow_status.running %}
+    <div class="mb-4">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-white fw-bold">{{ workflow_status.current_task }}</span>
+        <span class="text-muted small">Started: {{ workflow_status.started_at }}</span>
+      </div>
+      <div class="progress bg-secondary bg-opacity-25" style="height: 10px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar"
+          style="width: 100%"></div>
+      </div>
+    </div>
+    {% else %}
+    {% if workflow_status.completed_at %}
+    <div
+      class="alert alert-success bg-opacity-10 border-success border-opacity-25 text-success d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-check-circle-fill"></i>
+      <span>Last workflow completed at {{ workflow_status.completed_at }}</span>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Console Output -->
+    <div class="bg-dark rounded p-3 font-monospace small border border-secondary border-opacity-25"
+      style="max-height: 250px; overflow-y: auto;">
+      {% if workflow_status.progress %}
+      {% for entry in workflow_status.progress[-10:] %}
+      <div class="mb-1">
+        <span class="text-muted">[{{ entry.timestamp }}]</span>
+        <span class="text-info">{{ entry.task }}:</span>
+        <span class="text-white-50">{{ entry.message }}</span>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-muted fst-italic">Waiting for workflow logs...</div>
+      {% endif %}
+
+      {% if workflow_status.errors %}
+      <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
+        {% for error in workflow_status.errors %}
+        <div class="text-danger">
+          <span class="fw-bold">ERROR:</span> [{{ error.timestamp }}] {{ error.task }}: {{ error.message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="mt-3 text-end">
+      <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh Logs
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Current Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="glass-card p-3 text-center">
+      <h3 class="fw-bold text-white mb-1">{{ stats.new_listings }}</h3>
+      <p class="text-muted small mb-0">New Listings</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="glass-card p-3 text-center">
+      <h3 class="fw-bold text-success mb-1">{{ stats.listings_quoted }}</h3>
+      <p class="text-muted small mb-0">Ready for Email</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="glass-card p-3 text-center">
+      <h3 class="fw-bold text-info mb-1">{{ stats.listings_dscr_quoted }}</h3>
+      <p class="text-muted small mb-0">DSCR Quoted</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Main Workflows -->
+  <div class="col-lg-8">
+    <div class="glass-panel p-4 h-100">
+      <h5 class="mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-collection-play-fill text-primary"></i> Core Workflows
+      </h5>
+
+      <div class="row g-3">
+        <!-- Full Workflow -->
+        <div class="col-md-6">
+          <form method="POST" action="{{ url_for('workflow.run_workflow', workflow_name='full') }}" class="h-100">
+            <div class="glass-card p-3 h-100 d-flex flex-column">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded bg-primary bg-opacity-20 p-2 text-primary">
+                  <i class="bi bi-rocket-takeoff-fill fs-4"></i>
+                </div>
+                <h6 class="mb-0 text-white">Full Workflow</h6>
+              </div>
+
+              <div class="flex-grow-1">
+                <p class="text-muted small mb-3">End-to-end automation: Pricing → Scrape → Process → Quote → Email →
+                  Archive</p>
+
+                <select name="listing_status" class="form-select form-select-sm mb-2">
+                  <option value="new">New Listings Only</option>
+                  <option value="active">Active Listings</option>
+                  <option value="all">All Listings</option>
+                </select>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" name="debug" id="debug_full" value="true">
+                  <label class="form-check-label small text-muted" for="debug_full">Debug Mode</label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100" {% if workflow_status.running %}disabled{% endif %}>
+                <i class="bi bi-play-fill"></i> Run Full Cycle
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Quote & Email -->
+        <div class="col-md-6">
+          <form method="POST" action="{{ url_for('workflow.run_workflow', workflow_name='quote_email') }}"
+            class="h-100">
+            <div class="glass-card p-3 h-100 d-flex flex-column">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded bg-success bg-opacity-20 p-2 text-success">
+                  <i class="bi bi-envelope-check-fill fs-4"></i>
+                </div>
+                <h6 class="mb-0 text-white">Quote & Email</h6>
+              </div>
+
+              <div class="flex-grow-1">
+                <p class="text-muted small mb-3">Generate quotes and send emails for existing listings.</p>
+
+                <select name="listing_status" class="form-select form-select-sm mb-2">
+                  <option value="new">New Listings Only</option>
+                  <option value="active">Active Listings</option>
+                  <option value="all">All Listings</option>
+                </select>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" name="debug" id="debug_qe" value="true">
+                  <label class="form-check-label small text-muted" for="debug_qe">Debug Mode</label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success w-100" {% if workflow_status.running %}disabled{% endif %}>
+                <i class="bi bi-play-fill"></i> Run Quote & Email
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- DSCR Workflow -->
+        <div class="col-md-6">
+          <form method="POST" action="{{ url_for('workflow.run_workflow', workflow_name='dscr') }}" class="h-100">
+            <div class="glass-card p-3 h-100 d-flex flex-column">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded bg-info bg-opacity-20 p-2 text-info">
+                  <i class="bi bi-building-fill fs-4"></i>
+                </div>
+                <h6 class="mb-0 text-white">DSCR Workflow</h6>
+              </div>
+
+              <div class="flex-grow-1">
+                <p class="text-muted small mb-3">Investment loans: Pricing → Quotes → Emails</p>
+
+                <select name="listing_status" class="form-select form-select-sm mb-2">
+                  <option value="new">New Listings Only</option>
+                  <option value="active">Active Listings</option>
+                </select>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" name="debug" id="debug_dscr" value="true">
+                  <label class="form-check-label small text-muted" for="debug_dscr">Debug Mode</label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-info w-100" {% if workflow_status.running %}disabled{% endif %}>
+                <i class="bi bi-play-fill"></i> Run DSCR
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Process Only -->
+        <div class="col-md-6">
+          <form method="POST" action="{{ url_for('workflow.run_workflow', workflow_name='process_only') }}"
+            class="h-100">
+            <div class="glass-card p-3 h-100 d-flex flex-column">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded bg-warning bg-opacity-20 p-2 text-warning">
+                  <i class="bi bi-file-earmark-code-fill fs-4"></i>
+                </div>
+                <h6 class="mb-0 text-white">Process Only</h6>
+              </div>
+
+              <div class="flex-grow-1">
+                <p class="text-muted small mb-3">Parse downloaded HTML files and update database.</p>
+              </div>
+
+              <button type="submit" class="btn btn-warning w-100 mt-auto" {% if workflow_status.running %}disabled{%
+                endif %}>
+                <i class="bi bi-play-fill"></i> Process Files
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Individual Tasks -->
+  <div class="col-lg-4">
+    <div class="glass-panel p-4 h-100">
+      <h5 class="mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-tools text-secondary"></i> Task Toolbox
+      </h5>
+
+      <div class="d-flex flex-column gap-2">
+        <form method="POST" action="{{ url_for('workflow.scrape_pricing') }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm w-100 text-start">
+            <i class="bi bi-cash-stack me-2"></i> Scrape Pricing
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('workflow.scrape_homes') }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm w-100 text-start">
+            <i class="bi bi-download me-2"></i> Scrape HTML Files
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('workflow.process_listings') }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm w-100 text-start">
+            <i class="bi bi-file-code me-2"></i> Process Listings
+          </button>
+        </form>
+
+        <hr class="border-secondary border-opacity-25 my-2">
+
+        <form method="POST" action="{{ url_for('workflow.generate_quotes') }}">
+          <button type="submit" class="btn btn-outline-success btn-sm w-100 text-start">
+            <i class="bi bi-calculator me-2"></i> Generate Quotes
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('workflow.send_emails') }}">
+          <button type="submit" class="btn btn-outline-success btn-sm w-100 text-start">
+            <i class="bi bi-envelope me-2"></i> Send Emails
+          </button>
+        </form>
+
+        <hr class="border-secondary border-opacity-25 my-2">
+
+        <form method="POST" action="{{ url_for('workflow.dscr_pricing') }}">
+          <button type="submit" class="btn btn-outline-info btn-sm w-100 text-start">
+            <i class="bi bi-building me-2"></i> DSCR Pricing
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('workflow.archive') }}">
+          <button type="submit" class="btn btn-outline-warning btn-sm w-100 text-start">
+            <i class="bi bi-archive me-2"></i> Archive Tables
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('workflow.cleanup') }}"
+          onsubmit="return confirm('Are you sure you want to delete archived records?');">
+          <input type="hidden" name="confirm" value="true">
+          <button type="submit" class="btn btn-outline-danger btn-sm w-100 text-start">
+            <i class="bi bi-trash me-2"></i> Cleanup Archives
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-refresh status every 5 seconds if workflow is running
+  {% if workflow_status.running %}
+  setTimeout(function () {
+    window.location.reload();
+  }, 5000);
+  {% endif %}
+</script>
+{% endblock %}

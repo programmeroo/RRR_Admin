@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Contacts{% endblock %}
+{% block page_title %}Contact Management{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-people-fill text-info me-2"></i> All Contacts
+    </h5>
+  </div>
+
+  {% if contacts %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Type</th>
+          <th>Company</th>
+          <th>First Contact</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for contact in contacts %}
+        <tr>
+          <td class="text-muted">{{ contact.id }}</td>
+          <td><strong class="text-white">{{ contact.first_name }} {{ contact.last_name }}</strong></td>
+          <td><a href="mailto:{{ contact.email_address }}" class="text-info text-decoration-none">{{
+              contact.email_address }}</a></td>
+          <td>{{ contact.phone or 'N/A' }}</td>
+          <td><span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25">{{
+              contact.contact_type }}</span></td>
+          <td>{{ contact.company or 'N/A' }}</td>
+          <td><small class="text-muted">{{ contact.first_contact_date.strftime('%Y-%m-%d') if contact.first_contact_date
+              else 'N/A' }}</small></td>
+          <td>
+            {% if contact.unsubscribed_date %}
+            <span
+              class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">Unsubscribed</span>
+            {% else %}
+            <span
+              class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Active</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link bg-transparent border-secondary border-opacity-25 text-white"
+          href="{{ url_for('admin.contacts', page=pagination.prev_num) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages() %}
+      {% if page_num %}
+      <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+        <a class="page-link {% if page_num == pagination.page %}bg-primary border-primary text-white{% else %}bg-transparent border-secondary border-opacity-25 text-white{% endif %}"
+          href="{{ url_for('admin.contacts', page=page_num) }}">{{ page_num }}</a>
+      </li>
+      {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-transparent border-secondary border-opacity-25 text-white"
+          href="{{ url_for('admin.contacts', page=pagination.next_num) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="alert alert-info d-flex align-items-center gap-2">
+    <i class="bi bi-info-circle-fill"></i>
+    No contacts found.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

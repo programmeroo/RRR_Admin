@@ -1,0 +1,128 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Activity{% endblock %}
+{% block page_title %}Users Who Printed Flyers{% endblock %}
+
+{% block content %}
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-printer"></i> Realtors Who Visited Website to Print Flyers
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          These are high-priority leads - realtors who actively engaged with the website to print custom flyers.
+          Call these contacts directly to follow up.
+        </p>
+
+        {% if activities %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Print Count</th>
+                <th>Last Activity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for activity in activities %}
+              <tr>
+                <td>
+                  <strong>{{ activity.first_name }} {{ activity.last_name }}</strong>
+                </td>
+                <td>
+                  <a href="mailto:{{ activity.email_address }}">
+                    {{ activity.email_address }}
+                  </a>
+                </td>
+                <td>
+                  {% if activity.phone %}
+                    <a href="tel:{{ activity.phone }}">{{ activity.phone }}</a>
+                  {% else %}
+                    <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>{{ activity.company or 'N/A' }}</td>
+                <td>
+                  <span class="badge bg-primary">{{ activity.print_count }}</span>
+                </td>
+                <td>
+                  <small>{{ activity.last_activity.strftime('%Y-%m-%d %H:%M') if activity.last_activity else 'N/A' }}</small>
+                </td>
+                <td>
+                  <a href="mailto:{{ activity.email_address }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-envelope"></i> Email
+                  </a>
+                  {% if activity.phone %}
+                  <a href="tel:{{ activity.phone }}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-telephone"></i> Call
+                  </a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle"></i>
+          No flyer printing activity found yet.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Activity Metrics -->
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">
+          <i class="bi bi-graph-up"></i> Activity Insights
+        </h6>
+      </div>
+      <div class="card-body">
+        {% if activities %}
+        <div class="row text-center">
+          <div class="col-md-4">
+            <h3 class="text-primary">{{ activities|length }}</h3>
+            <p class="text-muted">Total Active Users</p>
+          </div>
+          <div class="col-md-4">
+            <h3 class="text-success">{{ activities|sum(attribute='print_count') }}</h3>
+            <p class="text-muted">Total Flyers Printed</p>
+          </div>
+          <div class="col-md-4">
+            <h3 class="text-info">{{ (activities|sum(attribute='print_count') / activities|length)|round(1) if activities else 0 }}</h3>
+            <p class="text-muted">Avg Prints per User</p>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted text-center mb-0">No activity data available</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+</style>
+{% endblock %}

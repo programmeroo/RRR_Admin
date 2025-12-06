@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block page_title %}System Analytics{% endblock %}
+
+{% block content %}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="mb-4 text-white">Quote Generation (Last 7 Days)</h5>
+            <canvas id="quotesChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="mb-4 text-white">Email Performance</h5>
+            <canvas id="emailChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="glass-panel p-4">
+    <h5 class="mb-4 text-white">System Health</h5>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Status</th>
+                    <th>Value</th>
+                    <th>Trend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>API Response Time</td>
+                    <td><span class="badge bg-success bg-opacity-10 text-success">Healthy</span></td>
+                    <td>124ms</td>
+                    <td><i class="bi bi-arrow-down-right text-success"></i> -5%</td>
+                </tr>
+                <tr>
+                    <td>Database Size</td>
+                    <td><span class="badge bg-success bg-opacity-10 text-success">Healthy</span></td>
+                    <td>450 MB</td>
+                    <td><i class="bi bi-arrow-up-right text-muted"></i> +1%</td>
+                </tr>
+                <tr>
+                    <td>Error Rate</td>
+                    <td><span class="badge bg-warning bg-opacity-10 text-warning">Warning</span></td>
+                    <td>0.5%</td>
+                    <td><i class="bi bi-arrow-up-right text-warning"></i> +0.2%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mock Data for Charts
+    const ctxQuotes = document.getElementById('quotesChart').getContext('2d');
+    new Chart(ctxQuotes, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Quotes Generated',
+                data: [65, 59, 80, 81, 56, 55, 40],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    const ctxEmail = document.getElementById('emailChart').getContext('2d');
+    new Chart(ctxEmail, {
+        type: 'doughnut',
+        data: {
+            labels: ['Opened', 'Clicked', 'Sent', 'Bounced'],
+            datasets: [{
+                data: [300, 50, 100, 20],
+                backgroundColor: [
+                    '#10b981',
+                    '#3b82f6',
+                    '#64748b',
+                    '#ef4444'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#94a3b8' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

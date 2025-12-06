@@ -1,0 +1,186 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+
+<!-- Stats Overview -->
+<div class="row g-4 mb-4 animate-fade-in">
+  <div class="col-md-3">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Active Listings</p>
+          <h2 class="mb-0 fw-bold">{{ stats.listings }}</h2>
+        </div>
+        <div class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary">
+          <i class="bi bi-house-fill fs-4"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-center text-success small">
+        <i class="bi bi-arrow-up-short"></i>
+        <span>Live on site</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Total Quotes</p>
+          <h2 class="mb-0 fw-bold">{{ stats.quotes }}</h2>
+        </div>
+        <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
+          <i class="bi bi-file-text-fill fs-4"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-center text-muted small">
+        <span>Generated to date</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">User Activities</p>
+          <h2 class="mb-0 fw-bold">{{ stats.activities }}</h2>
+        </div>
+        <div class="rounded-circle bg-info bg-opacity-10 p-2 text-info">
+          <i class="bi bi-activity fs-4"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-center text-info small">
+        <i class="bi bi-clock-history me-1"></i>
+        <span>Recent interactions</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">API Logs</p>
+          <h2 class="mb-0 fw-bold">{{ stats.api_logs }}</h2>
+        </div>
+        <div class="rounded-circle bg-warning bg-opacity-10 p-2 text-warning">
+          <i class="bi bi-server fs-4"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-center text-muted small">
+        <span>Requests logged</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Quick Actions -->
+  <div class="col-md-8">
+    <div class="glass-panel p-4 h-100">
+      <h5 class="mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions
+      </h5>
+      
+      <div class="row g-3">
+        <div class="col-md-6">
+          <a href="{{ url_for('workflow.index') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-primary bg-opacity-20 p-3 text-primary">
+              <i class="bi bi-play-circle-fill fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">Run Workflows</h6>
+              <p class="mb-0 text-muted small">Execute scraping, pricing, and email tasks</p>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-md-6">
+          <a href="{{ url_for('admin.user_activity') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-info bg-opacity-20 p-3 text-info">
+              <i class="bi bi-graph-up-arrow fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">View Activity</h6>
+              <p class="mb-0 text-muted small">Analyze user behavior and flyer prints</p>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-md-6">
+          <a href="{{ url_for('admin.listings') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-success bg-opacity-20 p-3 text-success">
+              <i class="bi bi-house-gear-fill fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">Manage Listings</h6>
+              <p class="mb-0 text-muted small">View and edit property listings</p>
+            </div>
+          </a>
+        </div>
+        
+        <div class="col-md-6">
+           <!-- API Switcher Form embedded as a card -->
+           <form method="POST" action="{{ url_for('admin.switch_api') }}" class="h-100">
+            <button type="submit" name="api_mode" value="{% if current_api_mode == 'local' %}remote{% else %}local{% endif %}" 
+                    class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none w-100 border-0 text-start">
+              <div class="rounded bg-danger bg-opacity-20 p-3 text-danger">
+                <i class="bi bi-arrow-repeat fs-4"></i>
+              </div>
+              <div>
+                <h6 class="mb-1 text-white">Switch API Server</h6>
+                <p class="mb-0 text-muted small">
+                  Current: <span class="text-white fw-bold">{{ current_api_mode|upper }}</span>
+                </p>
+              </div>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Status -->
+  <div class="col-md-4">
+    <div class="glass-panel p-4 h-100">
+      <h5 class="mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-hdd-network-fill text-info"></i> System Status
+      </h5>
+      
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3">
+          <span class="text-muted">API Connection</span>
+          <span class="badge bg-success bg-opacity-20 text-success">Connected</span>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3">
+          <span class="text-muted">Environment</span>
+          <span class="text-white">{{ current_api_mode|title }}</span>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3">
+          <span class="text-muted">Database</span>
+          <span class="text-white">MySQL (via API)</span>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">Last Sync</span>
+          <span class="text-white">Just now</span>
+        </div>
+      </div>
+      
+      <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+        <p class="text-muted small mb-2">Storage Usage</p>
+        <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
+          <div class="progress-bar bg-primary" role="progressbar" style="width: 45%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Flyer Printers{% endblock %}
+{% block page_title %}Flyer Printers{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-printer-fill text-info me-2"></i> Users Who Printed Flyers
+    </h5>
+
+    <form method="POST" action="{{ url_for('admin.extract_activities') }}">
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-arrow-repeat me-1"></i> Sync from Logs
+      </button>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>User / Contact</th>
+          <th>Phone</th>
+          <th>Company</th>
+          <th class="text-center">Type</th>
+          <th>MLS Number</th>
+          <th>Time</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for activity in flyer_printers %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary d-flex align-items-center justify-content-center"
+                style="width: 40px; height: 40px;">
+                <span class="fw-bold">{{ activity.first_name[:1] if activity.first_name else '?' }}{{
+                  activity.last_name[:1] if activity.last_name else '' }}</span>
+              </div>
+              <div>
+                <div class="fw-bold text-white">{{ activity.first_name }} {{ activity.last_name }}</div>
+                <div class="text-muted small">{{ activity.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ activity.phone }}</td>
+          <td>{{ activity.company }}</td>
+          <td class="text-center">
+            {% if 'owner' in activity.action %}
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">QM</span>
+            {% elif 'dscr' in activity.action %}
+            <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3">DSCR</span>
+            {% else %}
+            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Other</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="font-monospace">{{ activity.mls_number }}</span>
+          </td>
+          <td class="text-muted small">{{ activity.created }}</td>
+          <td class="text-end">
+            <a href="mailto:{{ activity.email }}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-envelope"></i>
+            </a>
+            <button class="btn btn-sm btn-outline-success" title="Mark Contacted">
+              <i class="bi bi-check-lg"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+            No flyer print activities found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

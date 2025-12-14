@@ -10,6 +10,21 @@
     <h5 class="mb-0 text-white">
       <i class="bi bi-currency-dollar text-warning me-2"></i> Daily Prices
     </h5>
+    <form method="GET" class="d-flex">
+      <select name="county" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+        <option value="99999" {% if log_days=='1' %}selected{% endif %}>All Counties</option>
+        <option value="90620" {% if log_days=='1' %}selected{% endif %}>Orange</option>
+        <option value="91901" {% if log_days=='5' %}selected{% endif %}>San Diego</option>
+        <option value="91708" {% if log_days=='7' %}selected{% endif %}>Riverside</option>
+        <option value="90001" {% if log_days=='7' %}selected{% endif %}>Los Angeles</option>
+        <option value="91319" {% if log_days=='7' %}selected{% endif %}>Ventura</option>
+        <option value="91701" {% if log_days=='7' %}selected{% endif %}>San Bernardino</option>
+        <option value="96701" {% if log_days=='7' %}selected{% endif %}>Honolulu</option>
+        <option value="96703" {% if log_days=='7' %}selected{% endif %}>Kauai</option>
+        <option value="96708" {% if log_days=='7' %}selected{% endif %}>Maui</option>
+        <option value="96704" {% if log_days=='7' %}selected{% endif %}>Hawaii</option>
+      </select>
+    </form>
   </div>
 
   {% if prices %}
@@ -19,7 +34,8 @@
         <tr>
           <th>Date</th>
           <th>County</th>
-          <th>Loan Type</th>
+          <th>Listing Type</th>
+          <th>Loan Program</th>
           <th>Rate</th>
           <th>APR</th>
           <th>Points/Credits</th>
@@ -28,9 +44,10 @@
       <tbody>
         {% for price in prices %}
         <tr>
-          <td><small class="text-muted">{{ price.priced_on.strftime('%Y-%m-%d') if price.priced_on else 'N/A' }}</small>
+          <td><small class="text-muted">{{ price.price_date_only if price.price_date_only else 'N/A' }}</small>
           </td>
           <td class="text-white">{{ price.county }}</td>
+          <td class="text-white">{{ price.listing_type }}</td>
           <td><span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25">{{
               price.loan_type }}</span></td>
           <td class="text-white fw-bold">{{ "%.3f"|format(price.rate) }}%</td>

@@ -7,72 +7,139 @@
 
 <!-- Stats Overview -->
 <div class="row g-4 mb-4 animate-fade-in">
-  <div class="col-md-3">
+  <!-- Listings Summary -->
+  <div class="col-md-6">
     <div class="glass-card p-4">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <p class="text-muted mb-1 text-uppercase small fw-bold">Active Listings</p>
-          <h2 class="mb-0 fw-bold">{{ stats.listings }}</h2>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Listings</p>
+          <h2 class="mb-0 fw-bold">{{ ((stats.listings_summary.TOTAL or 0) - (stats.listings_summary.sold or 0)) }}</h2>
+          <small class="text-success">Active (Total - Sold)</small>
         </div>
         <div class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary">
           <i class="bi bi-house-fill fs-4"></i>
         </div>
       </div>
-      <div class="d-flex align-items-center text-success small">
-        <i class="bi bi-arrow-up-short"></i>
-        <span>Live on site</span>
+      <div class="row g-2 mt-2">
+        {% for status, count in stats.listings_summary.items() %}
+          {% if status != 'TOTAL' %}
+            <div class="col-4 text-center">
+              <small class="text-muted d-block">{{ status|replace('_', ' ')|title }}</small>
+              <strong class="{% if status == 'sold' %}text-danger{% elif status == 'new' %}text-info{% elif status in ['quoted', 'dscr_quoted'] %}text-warning{% else %}text-success{% endif %}">{{ count }}</strong>
+            </div>
+          {% endif %}
+        {% endfor %}
       </div>
     </div>
   </div>
-  
+
+  <!-- Contacts -->
   <div class="col-md-3">
     <div class="glass-card p-4">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <p class="text-muted mb-1 text-uppercase small fw-bold">Total Quotes</p>
-          <h2 class="mb-0 fw-bold">{{ stats.quotes }}</h2>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Contacts</p>
+          <h2 class="mb-0 fw-bold">{{ stats.contacts_subscribed + stats.contacts_unsubscribed }}</h2>
         </div>
         <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
-          <i class="bi bi-file-text-fill fs-4"></i>
+          <i class="bi bi-people-fill fs-4"></i>
         </div>
       </div>
-      <div class="d-flex align-items-center text-muted small">
-        <span>Generated to date</span>
+      <div class="d-flex justify-content-between text-sm mt-2">
+        <span class="text-success"><i class="bi bi-check-circle me-1"></i>{{ stats.contacts_subscribed }} Subscribed</span>
+      </div>
+      <div class="d-flex justify-content-between text-sm">
+        <span class="text-danger"><i class="bi bi-x-circle me-1"></i>{{ stats.contacts_unsubscribed }} Unsubscribed</span>
       </div>
     </div>
   </div>
-  
+
+  <!-- Flyer Printers -->
   <div class="col-md-3">
     <div class="glass-card p-4">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <p class="text-muted mb-1 text-uppercase small fw-bold">User Activities</p>
-          <h2 class="mb-0 fw-bold">{{ stats.activities }}</h2>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Flyer Printers</p>
+          <h2 class="mb-0 fw-bold">{{ stats.flyer_printers }}</h2>
         </div>
         <div class="rounded-circle bg-info bg-opacity-10 p-2 text-info">
-          <i class="bi bi-activity fs-4"></i>
+          <i class="bi bi-printer-fill fs-4"></i>
         </div>
       </div>
       <div class="d-flex align-items-center text-info small">
-        <i class="bi bi-clock-history me-1"></i>
-        <span>Recent interactions</span>
+        <i class="bi bi-person-check me-1"></i>
+        <span>Unique users</span>
       </div>
     </div>
   </div>
-  
-  <div class="col-md-3">
+</div>
+
+<!-- Rates and Logs Row -->
+<div class="row g-4 mb-4">
+  <!-- Rates -->
+  <div class="col-md-8">
     <div class="glass-card p-4">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <p class="text-muted mb-1 text-uppercase small fw-bold">API Logs</p>
-          <h2 class="mb-0 fw-bold">{{ stats.api_logs }}</h2>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Rates - Orange County (House)</p>
         </div>
         <div class="rounded-circle bg-warning bg-opacity-10 p-2 text-warning">
+          <i class="bi bi-percent fs-4"></i>
+        </div>
+      </div>
+      <div class="row g-2">
+        <div class="col-md-3 col-6 text-center">
+          <small class="text-muted d-block">Conv-20</small>
+          <strong class="text-white">{{ stats.rates.conv_20 or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-3 col-6 text-center">
+          <small class="text-muted d-block">Conv-5</small>
+          <strong class="text-white">{{ stats.rates.conv_5 or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-3 col-6 text-center">
+          <small class="text-muted d-block">High-Bal-20</small>
+          <strong class="text-white">{{ stats.rates.high_bal_20 or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-3 col-6 text-center">
+          <small class="text-muted d-block">High-Bal-5</small>
+          <strong class="text-white">{{ stats.rates.high_bal_5 or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-4 col-4 text-center mt-2">
+          <small class="text-muted d-block">FHA</small>
+          <strong class="text-white">{{ stats.rates.fha or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-4 col-4 text-center mt-2">
+          <small class="text-muted d-block">VA</small>
+          <strong class="text-white">{{ stats.rates.va or 'N/A' }}</strong>
+        </div>
+        <div class="col-md-4 col-4 text-center mt-2">
+          <small class="text-muted d-block">Jumbo</small>
+          <strong class="text-white">{{ stats.rates.jumbo or 'N/A' }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs -->
+  <div class="col-md-4">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <p class="text-muted mb-1 text-uppercase small fw-bold">Logs</p>
+          <h2 class="mb-0 fw-bold">{{ stats.api_logs + stats.web_logs }}</h2>
+          <small class="text-muted">Total records</small>
+        </div>
+        <div class="rounded-circle bg-secondary bg-opacity-10 p-2 text-secondary">
           <i class="bi bi-server fs-4"></i>
         </div>
       </div>
-      <div class="d-flex align-items-center text-muted small">
-        <span>Requests logged</span>
+      <div class="d-flex justify-content-between mt-3 pt-3 border-top border-secondary border-opacity-25">
+        <span class="text-muted">API Logs</span>
+        <strong class="text-white">{{ stats.api_logs }}</strong>
+      </div>
+      <div class="d-flex justify-content-between mt-2">
+        <span class="text-muted">Web Logs</span>
+        <strong class="text-white">{{ stats.web_logs }}</strong>
       </div>
     </div>
   </div>
@@ -100,7 +167,7 @@
         </div>
         
         <div class="col-md-6">
-          <a href="{{ url_for('admin.user_activity') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+          <a href="{{ url_for('admin.visitor_activity') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
             <div class="rounded bg-info bg-opacity-20 p-3 text-info">
               <i class="bi bi-graph-up-arrow fs-4"></i>
             </div>

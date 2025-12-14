@@ -64,8 +64,7 @@
               listing.status }}</span>
             {% endif %}
           </td>
-          <td><small class="text-muted">{{ listing.created_at.strftime('%Y-%m-%d') if listing.created_at else 'N/A'
-              }}</small></td>
+          <td><small class="text-muted">{{ listing.created_at }}</small></td>
         </tr>
         {% endfor %}
       </tbody>

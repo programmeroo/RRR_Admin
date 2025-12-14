@@ -10,6 +10,14 @@
     <h5 class="mb-0 text-white">
       <i class="bi bi-people-fill text-info me-2"></i> All Contacts
     </h5>
+
+    <form method="GET" class="d-flex">
+      <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+        <option value="active" {% if filter=='active' %}selected{% endif %}>Active Status</option>
+        <option value="unsubscribed" {% if filter=='unsubscribed' %}selected{% endif %}>Unsubscribed</option>
+      </select>
+    </form>
+  </div>
   </div>
 
   {% if contacts %}
@@ -38,8 +46,7 @@
           <td><span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25">{{
               contact.contact_type }}</span></td>
           <td>{{ contact.company or 'N/A' }}</td>
-          <td><small class="text-muted">{{ contact.first_contact_date.strftime('%Y-%m-%d') if contact.first_contact_date
-              else 'N/A' }}</small></td>
+          <td><small class="text-muted">{{ contact.first_contact_date or 'N/A' }}</small></td>
           <td>
             {% if contact.unsubscribed_date %}
             <span

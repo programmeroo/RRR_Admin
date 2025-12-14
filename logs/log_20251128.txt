@@ -1,8 +1,0 @@
-2025-11-28 12:55:47 - workflow: Starting workflow with 2 tasks
-2025-11-28 12:55:47 - do_scrape: Scraping HTML files from Downloads...
-2025-11-28 12:55:47 - do_scrape: Error: module 'services.scrape_homes' has no attribute 'scrape'
-2025-11-28 12:55:47 - do_scrape: Task returned False - continuing anyway
-2025-11-28 12:55:47 - do_process_pages: Processing listing HTML files...
-2025-11-28 12:55:47 - do_process_pages: Error: module 'services.process_listings' has no attribute 'process_files'
-2025-11-28 12:55:47 - do_process_pages: Task returned False - continuing anyway
-2025-11-28 12:55:47 - workflow: Workflow completed

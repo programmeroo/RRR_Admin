@@ -269,15 +269,12 @@ def run_workflow(workflow, **kwargs):
 
 
 # Predefined workflows (like in TKinter app)
-WORKFLOW_FULL = [
+WORKFLOW_QM = [
     do_pricing,
     do_scrape,
     do_process_pages,
     do_quote,
     do_email,
-    do_dscr_pricing,
-    do_dscr_quote,
-    do_dscr_email,
     do_archive,
     do_clean_up
 ]

@@ -1,7 +1,9 @@
 """Admin workflow routes - run workflows in background like TKinter app"""
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from services import database_access as api
 from services import workflow_runner as runner
+from services.my_logger import log
+
 
 workflow_bp = Blueprint('workflow', __name__, url_prefix='/admin/workflow')
 
@@ -51,7 +53,7 @@ def run_workflow(workflow_name):
     # Check if a workflow is already running
     status = runner.get_workflow_status()
     if status['running']:
-        flash('A workflow is already running. Please wait for it to complete.', 'warning')
+        log('A workflow is already running. Please wait for it to complete.')
         return redirect(url_for('workflow.index'))
 
     # Get workflow parameters
@@ -60,7 +62,7 @@ def run_workflow(workflow_name):
 
     # Select workflow
     workflows = {
-        'full': runner.WORKFLOW_FULL,
+        'qm': runner.WORKFLOW_QM,
         'quote_email': runner.WORKFLOW_QUOTE_EMAIL,
         'dscr': runner.WORKFLOW_DSCR,
         'process_only': runner.WORKFLOW_PROCESS_ONLY,
@@ -68,13 +70,13 @@ def run_workflow(workflow_name):
 
     workflow = workflows.get(workflow_name)
     if not workflow:
-        flash(f'Invalid workflow: {workflow_name}', 'danger')
+        log(f'Invalid workflow: {workflow_name}')
         return redirect(url_for('workflow.index'))
 
     # Start workflow in background
     runner.run_workflow(workflow, listing_status=listing_status, debug=debug)
 
-    flash(f'✅ Started {workflow_name} workflow in background. Use the status panel to monitor progress.', 'success')
+    log(f'✅ Started {workflow_name} workflow in background. Use the status panel to monitor progress.')
     return redirect(url_for('workflow.index'))
 
 
@@ -85,9 +87,9 @@ def scrape_homes():
     """Copy HTML files from Downloads to processing folder"""
     try:
         result = runner.do_scrape()
-        flash('Scrape homes completed - check status for details', 'success' if result else 'warning')
+        log(f'Scrape homes completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -96,9 +98,9 @@ def process_listings():
     """Process listing pages from HTML files"""
     try:
         result = runner.do_process_pages()
-        flash('Process listings completed - check status for details', 'success' if result else 'warning')
+        log(f'Process listings completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -107,9 +109,9 @@ def scrape_pricing():
     """Scrape mortgage pricing from LoanFactory"""
     try:
         result = runner.do_pricing()
-        flash('Pricing scrape completed - check status for details', 'success' if result else 'warning')
+        log(f'Pricing scrape completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -120,9 +122,9 @@ def generate_quotes():
 
     try:
         result = runner.do_quote(listing_status)
-        flash('Quote generation completed - check status for details', 'success' if result else 'warning')
+        log(f'Quote generation completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -133,9 +135,9 @@ def generate_dscr_quotes():
 
     try:
         result = runner.do_dscr_quote(listing_status)
-        flash('DSCR quote generation completed - check status for details', 'success' if result else 'warning')
+        log(f'DSCR quote generation completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -146,9 +148,9 @@ def send_emails():
 
     try:
         result = runner.do_email(debug)
-        flash('Email sending completed - check status for details', 'success' if result else 'warning')
+        log(f'Email sending completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -159,9 +161,9 @@ def send_dscr_emails():
 
     try:
         result = runner.do_dscr_email(debug)
-        flash('DSCR email sending completed - check status for details', 'success' if result else 'warning')
+        log(f'DSCR email sending completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -170,9 +172,9 @@ def dscr_pricing():
     """Add DSCR pricing"""
     try:
         result = runner.do_dscr_pricing()
-        flash('DSCR pricing completed - check status for details', 'success' if result else 'warning')
+        log(f'DSCR pricing completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -181,9 +183,9 @@ def archive():
     """Archive tables to CSV"""
     try:
         result = runner.do_archive()
-        flash('Archive completed - check status for details', 'success' if result else 'warning')
+        log(f'Archive completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))
 
 
@@ -193,12 +195,12 @@ def cleanup():
     confirm = request.form.get('confirm', 'false')
 
     if confirm != 'true':
-        flash('Cleanup requires confirmation. Please check the confirmation box.', 'warning')
+        log('Cleanup requires confirmation. Please check the confirmation box.')
         return redirect(url_for('workflow.index'))
 
     try:
         result = runner.do_clean_up()
-        flash('Cleanup completed - check status for details', 'success' if result else 'warning')
+        log(f'Cleanup completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
+        log(f'Error: {str(e)}')
     return redirect(url_for('workflow.index'))

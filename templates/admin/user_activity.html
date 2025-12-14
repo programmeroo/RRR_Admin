@@ -9,14 +9,18 @@
   <div class="col-md-12">
     <div class="card">
       <div class="card-header bg-success text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-printer"></i> Realtors Who Visited Website to Print Flyers
-        </h5>
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-people-fill"></i> Website Visitors
+          </h5>
+          <a href="{{ url_for('admin.export_visitor_activity') }}" class="btn btn-light btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+          </a>
+        </div>
       </div>
       <div class="card-body">
         <p class="text-muted">
-          These are high-priority leads - realtors who actively engaged with the website to print custom flyers.
-          Call these contacts directly to follow up.
+          These are Active Website Users
         </p>
 
         {% if activities %}
@@ -28,7 +32,7 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Company</th>
-                <th>Print Count</th>
+                <th>Page Visit Count</th>
                 <th>Last Activity</th>
                 <th>Actions</th>
               </tr>
@@ -53,10 +57,10 @@
                 </td>
                 <td>{{ activity.company or 'N/A' }}</td>
                 <td>
-                  <span class="badge bg-primary">{{ activity.print_count }}</span>
+                  <span class="badge bg-primary">{{ activity.page_count }}</span>
                 </td>
                 <td>
-                  <small>{{ activity.last_activity.strftime('%Y-%m-%d %H:%M') if activity.last_activity else 'N/A' }}</small>
+                  <small>{{ activity.last_activity or 'N/A' }}</small>
                 </td>
                 <td>
                   <a href="mailto:{{ activity.email_address }}" class="btn btn-sm btn-outline-primary">
@@ -101,12 +105,12 @@
             <p class="text-muted">Total Active Users</p>
           </div>
           <div class="col-md-4">
-            <h3 class="text-success">{{ activities|sum(attribute='print_count') }}</h3>
-            <p class="text-muted">Total Flyers Printed</p>
+            <h3 class="text-success">{{ activities|sum(attribute='page_count') }}</h3>
+            <p class="text-muted">Total Pages Visited</p>
           </div>
           <div class="col-md-4">
-            <h3 class="text-info">{{ (activities|sum(attribute='print_count') / activities|length)|round(1) if activities else 0 }}</h3>
-            <p class="text-muted">Avg Prints per User</p>
+            <h3 class="text-info">{{ (activities|sum(attribute='page_count') / activities|length)|round(1) if activities else 0 }}</h3>
+            <p class="text-muted">Avg Pages per User</p>
           </div>
         </div>
         {% else %}

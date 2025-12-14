@@ -4,7 +4,8 @@
       "Bash(python flask_app.py:*)",
       "Bash(curl:*)",
       "Bash(python:*)",
-      "Bash(.venv/Scripts/python.exe app.py)"
+      "Bash(.venv/Scripts/python.exe app.py)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

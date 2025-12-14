@@ -6,12 +6,13 @@ Accesses all data via REST API calls to RRR_Server
 # Fix Windows console encoding for emojis
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+# sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from flask import Flask, session
 from flask_cors import CORS
 from datetime import datetime
 from config import DevelopmentConfig, ProductionConfig
+from services.my_logger import log
 import os
 
 
@@ -20,10 +21,10 @@ def create_app():
 
     # Select environment config
     if os.environ.get("FLASK_ENV") == "production":
-        print("✅ PRODUCTION MODE")
+        log("✅ PRODUCTION MODE")
         app.config.from_object(ProductionConfig)
     else:
-        print("✅ DEVELOPMENT MODE")
+        log("✅ DEVELOPMENT MODE")
         app.config.from_object(DevelopmentConfig)
 
     # Initialize API mode in session
@@ -41,8 +42,8 @@ def create_app():
 
 app = create_app()
 
-print(f"📡 API URL: {app.config.get('API_URL')}")
-print(f"🔑 API Key configured: {'Yes' if app.config.get('API_KEY') else 'No'}")
+log(f"📡 API URL: {app.config.get('API_URL')}")
+log(f"🔑 API Key configured: {'Yes' if app.config.get('API_KEY') else 'No'}")
 
 CORS(app)
 
@@ -51,7 +52,7 @@ CORS(app)
 from routes import blueprints as admin_blueprints
 for bp in admin_blueprints:
     app.register_blueprint(bp)
-    print(f"✅ Registered blueprint: {bp.name}")
+    log(f"✅ Registered blueprint: {bp.name}")
 
 
 # ---------------------------------------------------------
@@ -101,13 +102,13 @@ def favicon():
 # ---------------------------------------------------------
 
 if __name__ == "__main__":
-    print("\n" + "="*50)
-    print("🚀 Starting RRR Admin Server")
-    print("="*50)
-    print(f"Mode: {'PRODUCTION' if not app.config['DEBUG'] else 'DEVELOPMENT'}")
-    print(f"Port: 5001")
-    print(f"URL: http://localhost:5001/admin")
-    print("="*50 + "\n")
+    log("\n" + "="*50)
+    log("🚀 Starting RRR Admin Server")
+    log("="*50)
+    log(f"Mode: {'PRODUCTION' if not app.config['DEBUG'] else 'DEVELOPMENT'}")
+    log(f"Port: 5001")
+    log(f"URL: http://localhost:5001/admin")
+    log("="*50 + "\n")
 
     app.run(
         host="0.0.0.0",

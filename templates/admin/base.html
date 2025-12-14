@@ -49,14 +49,14 @@
         
         <div class="nav-section-title">Analytics</div>
 
-        <a href="{{ url_for('admin.flyer_printers') }}"
-           class="admin-nav-link {% if request.endpoint == 'admin.flyer_printers' %}active{% endif %}">
-          <i class="bi bi-printer-fill"></i> Flyer Printers
+        <a href="{{ url_for('admin.visitor_activity') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.visitor_activity' %}active{% endif %}">
+          <i class="bi bi-people-fill"></i> User Activity
         </a>
 
-        <a href="{{ url_for('admin.user_activity') }}"
-           class="admin-nav-link {% if request.endpoint == 'admin.user_activity' %}active{% endif %}">
-          <i class="bi bi-activity"></i> User Activity
+        <a href="{{ url_for('admin.user_print_activity') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.user_print_activity' %}active{% endif %}">
+          <i class="bi bi-printer-fill"></i> Flyer Printers
         </a>
 
         <div class="nav-section-title">Data Management</div>
@@ -66,10 +66,6 @@
           <i class="bi bi-house-fill"></i> Listings
         </a>
 
-        <a href="{{ url_for('admin.quotes') }}"
-           class="admin-nav-link {% if request.endpoint == 'admin.quotes' %}active{% endif %}">
-          <i class="bi bi-file-text-fill"></i> Quotes
-        </a>
 
         <a href="{{ url_for('admin.contacts') }}"
            class="admin-nav-link {% if request.endpoint == 'admin.contacts' %}active{% endif %}">
@@ -79,6 +75,16 @@
         <a href="{{ url_for('admin.daily_prices') }}"
            class="admin-nav-link {% if request.endpoint == 'admin.daily_prices' %}active{% endif %}">
           <i class="bi bi-currency-dollar"></i> Daily Prices
+        </a>
+
+        <a href="{{ url_for('admin.api_logs') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.api-logs' %}active{% endif %}">
+          <i class="bi bi-currency-dollar"></i> API Logs
+        </a>
+
+        <a href="{{ url_for('admin.web_logs') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.web-logs' %}active{% endif %}">
+          <i class="bi bi-currency-dollar"></i> WEB Logs
         </a>
       </div>
     </nav>

@@ -83,73 +83,44 @@ Be pragmatic. Be reliable. Self-anneal.
 - We will use the RRR_LOGS folder for file access and log files.
 
 ### **Features Priority**
-1. 
+# Task List for Fixes and Upgrades
 
-### **Additional Admin Features**
-Here are some additional admin functions I need, some of which I am handling manually in mysql workbench:  
-1. Find users that have gone to the website to print flyers. A view in the db would be used to get the activity and contact information so I can call these realtors directly. This is a multi-step process: first copy from api_log to activities, create activity record, remove the api_log entry.
-2. Get stats on api_log, daily_prices, quotes, listings, dscr_quotes, emails, and dscr_emails. 
-I am interested in finding patterns to improve the website and block hackers.
-3. Better control over purging tables that are getting bloated, such as api_log, daily_prices, quotes, dscr_quotes and emails.
-4. Use logger in my_logger.py.
-5. Notification emails when important things happen.
-6. Change pricing or mark as sold for any specific realtor's listing. It should be a quick thing to do when I am on the phone with them.
-7. Add a custom listing for a realtor. Maybe impersonate the realtor?
-8. The dashboard should have graphic representation of the current workflow, including number of listings, quotes, emails as they happen with performance figures. This should be clickable to get details.
-9. Unsubscribe list and login list.
-10. Access to tables and views, such as daily_prices, dscr_daily_prices, contacts, users, listing_page_view, activities, and quotes.
-121 Sort data in column display.
+1. Get the app working. None of the logs are printed to the console and a log file was not created in the 
+1. Get list of Flyer Printers. Option to save to CSV file.
 
 
-### **Proposed Structure**
-RRR_Server/
-  ├── app.py
-  ├── .env
-  ├── utils.py
-  ├── config.py
-  ├── docs/
-  |   └── claude/
-  |   └── project/ 
-  ├── routes/
-  │   └── admin_routes.py
-  │   └── workflow_routes.py
-  └── static/
-  |   └── css/
-  |   └── images/
-  |   └── js/
-  |     ├── activity.js
-  |     └── util.js
-  └── services/
-  |   ├── activities.py
-  |   ├── archives.py
-  |   ├── database_access.py
-  │   ├── database_views.html
-  |   ├── dashboard.py
-  |   ├── flyer_printers.py
-  |   ├── listing_admin.py
-  |   ├── settings.py
-  |   ├── user_admin.py
-  │   └── workflow/            
-  │      ├── database_access.py
-  │      ├── dscr_pricing.py
-  │      ├── database_access.py
-  │      ├── my_logger.py
-  │      ├── process_listings.py
-  │      ├── scrape_homes.py
-  │      ├── scrape_pricing.py
-  │      └── workflow.py
-  |
-  ├── templates/
-  │   ├── base.html
-  │   ├── archives.html
-  │   ├── contacts.html
-  │   ├── daily_prices.html
-  │   ├── dashboard.html
-  │   ├── database_query.html
-  │   ├── listings.html
-  │   ├── quotes.html
-  │   ├── user_activity.html
-  │   ├── security_panel.html
-  │   └── workflows.html
+#All other tasks below will be addressed at a later date. 
+
+2. Change pricing or mark as sold for any specific realtor's listing. It should be a quick thing to do when I am on the phone with them.
+3. Get stats on api_log, daily_prices, quotes, listings, dscr_quotes, emails, and dscr_emails.
+4. Add a custom listing for a realtor. Maybe impersonate the realtor?
+5. The dashboard should have graphic representation of the current workflow, including number of listings, quotes, emails as they happen with performance figures. This should be clickable to get details.
+6. Unsubscribe list and login list.
+7. Access to tables and views, such as daily_prices, dscr_daily_prices, contacts, users, listing_page_view, activities, and quotes.
+8. Sort data in column display.
+9. Send Updates to a specified email.
+10. Send Updates to both contacts when specifying mls number or address.
+11. Log into any dashboard using my admin account.
+12. Feature: Auto requotes; send DSCR report after 1 weeks, following week different email (TBD).
+13. Copy me on specific emails from the dashboard perhaps BCC checkbox.
+14. DSCR daily-pricing on Raspberry-PI.
+15. Frequent Flyer list.
+16. Landing Pages.
+17. Website Training Video.
+18. Use logger everywhere - my_logger.py. 
+19. api_log should help me find patterns to improve the website and detect intruders.
+20. Create a CRM App.
+    - Send email campaigns.
+    - Track website usage.
+    - Track conversations.
+    - Track received emails from Loan Factory.
+    - Collaborate with Monalisa.
+    - Collaborate with Realtors.
+    - Send Rate Alerts.
+    - Send Rate Updates.
+   
+
+
+
 
 

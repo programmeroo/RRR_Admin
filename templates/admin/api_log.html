@@ -1,0 +1,91 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Listings{% endblock %}
+{% block page_title %}API LOGS{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-house-fill text-primary me-2"></i> API Logs
+    </h5>
+
+    <form method="GET" class="d-flex">
+      <select name="log_days" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+        <option value="1" {% if log_days=='1' %}selected{% endif %}>Today</option>
+        <option value="5" {% if log_days=='5' %}selected{% endif %}>5 Days</option>
+        <option value="7" {% if log_days=='7' %}selected{% endif %}>1 Week</option>
+        <option value="30" {% if log_days=='30' %}selected{% endif %}>1 Month</option>
+        <option value="90" {% if log_days=='90' %}selected{% endif %}>All Records</option>
+      </select>
+    </form>
+  </div>
+
+  {% if api_log_data %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Timestamp</th>
+          <th>Endpoint</th>
+          <th>Request Parameters</th>
+          <th>Status Code</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for api_log in api_log_data %}
+        <tr>
+          <td><strong class="text-white">{{ api_log.id }}</strong></td>
+          <td>{{ api_log.timestamp }}</td>
+          <td>{{ api_log.endpoint }}</td>
+          <td>{{ api_log.request_params }}</td>
+          <td>{{ api_log.status_code }}</td>
+          <td>{{ api_log.ip_address }}</td>                                    
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link bg-transparent border-secondary border-opacity-25 text-white"
+          href="{{ url_for('admin.listings', page=pagination.prev_num, status=status_filter) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages() %}
+      {% if page_num %}
+      <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+        <a class="page-link {% if page_num == pagination.page %}bg-primary border-primary text-white{% else %}bg-transparent border-secondary border-opacity-25 text-white{% endif %}"
+          href="{{ url_for('admin.listings', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+      </li>
+      {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-transparent border-secondary border-opacity-25 text-white"
+          href="{{ url_for('admin.listings', page=pagination.next_num, status=status_filter) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="alert alert-info d-flex align-items-center gap-2">
+    <i class="bi bi-info-circle-fill"></i>
+    No API Logs found in: <strong>{{ log_days }} days</strong>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

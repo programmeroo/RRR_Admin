@@ -294,18 +294,20 @@ def update_listing(**kwargs):
 # ### TEST FUNCTIONS  ###
 ###################################################################################
 
-# set_server("local")
+set_server("local")
 # set_server("remote")
 # today = datetime.now().date()
 # print(today)
-# data = {}
-# status_code = 0
+data = {}
+status_code = 0
 
 # data, status_code = get_contacts_summary()
 # data, status_code = get_api_logs_summary()
 # data, status_code = get_listings_summary()
 
-# data, status_code = add_affordability_reports(status="quoted")
+# data, status_code = add_affordability_reports(status="dscr_emailed")
+
+data, status_code = add_affordability_emails(debug=True, max_send_count=2)
 
 # data, status_code = add_affordability_emails(debug=True)
 
@@ -341,7 +343,7 @@ def update_listing(**kwargs):
  # data, status_code = purge_api_log(before=today)
 # data, status_code = get_conforming_limit(zipcode=90001, normalized_type="single")
 
-# print(data)
+print(data)
 
 
 

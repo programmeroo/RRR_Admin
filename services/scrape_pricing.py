@@ -17,11 +17,7 @@ import argparse
 
 
 OS_RELEASE = platform.release()
-
-
 PRICING_ENGINE_URL = "https://www.loanfactorydirect.com/quote/qm?"
-LOGFILE_PATH = r"C:/LOCAL_PROJECTS/RateReadyRealtor/logs/processing.log"
-
 debugging = False
 driver = None
 

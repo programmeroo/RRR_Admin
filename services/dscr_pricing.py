@@ -1,37 +1,26 @@
 import time
 from bs4 import BeautifulSoup
+import re
+from decimal import Decimal
+from datetime import datetime
+from services.my_logger import log
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from services.database_access import add_dscr_price, add_dscr_quotes, set_server
-from decimal import Decimal
-from datetime import datetime, date
-from services.my_logger import log
 import os
 import platform
 from dotenv import load_dotenv
-import argparse
-import re
 from twilio.rest import Client
-
+import argparse
+# from dscr_db_access import add_dscr_price, set_server   # use this on RaspBerry-Pi
+from services.database_access import add_dscr_price, set_server  # use this on admin app
 
 OS_RELEASE = platform.release()
-
-
-LOGFILE_PATH = r"C:/LOCAL_PROJECTS/RateReadyRealtor/logs/processing.log"
-
 debugging = False
 driver = None
-
-
-# Scenarios - 3 scenarios for house or condo.
-# House, Min FICO 740, LTV 80%, 30 yr-fixed rate.
-# House, Min FICO 740, LTV 75%, 30 yr-fixed.
-# House, Min FICO 740, LTV 75%, 30 yr-fixed, 10 yr I/O.
-# Condo, Min FICO 740, LTV 80%, 30 yr-fixed rate.
-# Condo, Min FICO 740, LTV 75%, 30 yr-fixed.
-# Condo, Min FICO 740, LTV 75%, 30 yr-fixed, 10 yr I/O.
 
 
 def dscr_pricing(z_list=None):
@@ -41,15 +30,16 @@ def dscr_pricing(z_list=None):
     if z_list == None:
         z_list = [90620, 91901, 91708, 90001, 91319, 91701, 96701, 96703, 96708, 96704]
 
-    house_80 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=800000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
-    house_75 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
-    house_75_io = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=Yes&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
-    condo_80 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=800000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
-    condo_75 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
-    condo_75_io = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1200000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=Yes&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    house_80 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=800000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    house_75 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    house_75_io = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Single&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=Yes&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    condo_80 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=800000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    condo_75 = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=No&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
+    condo_75_io = "https://www.loanfactorydirect.com/quote/non_qm?purpose=PM&property_value=1000000&loan_amount=750000&credit_score=780&non_qm_document_type=property_cash_flow_or_dscr&occupancy=Investment&loan_type=Non_QM&state=HI&zip=96813&property_type=Condo&actual_number_of_units=1&citizenship=us_citizen&mortgage_lates=No_mortgage_late&credit_event=None&prepayment_penalty=_60_months_pp&non_qm_cash_reserved=6&interest_only=Yes&lock_period=30&has_self_employed=No&non_qm_dscr=1&first_time_investor=No&loan_to_close_name=Individual&borrower_paid_compensation=1&compensation_type=borrower_paid&impounds=Yes&employment_history=2&loan_program_group=FIXED_30"
 
     start = datetime.now()
-    log(f"{start}  Start pricing")
+    log("     ")
+    log(f"{start}  Start DSCR pricing")
     count = 0
 
     dscr_programs = [
@@ -67,16 +57,23 @@ def dscr_pricing(z_list=None):
     driver = start_selenium()
 
     for program in dscr_programs:
+        listing_type = program.get("listing_type")
+        LTV = program.get("ltv")
+        interest_only = program.get("interest_only")
+        log(f"Scrape - {listing_type} LTV: {LTV} IO: {interest_only}")
+        
         program["quote"] = scrape_dscr_price(driver, url = program.get("url"))
+        quote =  program.get("quote")
 
-    for zipcode in z_list:
-        for program in dscr_programs:
-            quote =  program.get("quote")
+        for zipcode in z_list:
+            log(f"{county_names.get(zipcode)} Rate: {quote.get('rate')} APR: {quote.get('apr')} Points: {quote.get('points_credits')} Lender: {quote.get('lender')} ")
+
             price_params = {
                 "listing_type" : program.get("listing_type"),
                 "zipcode" : zipcode,
                 "lender" : quote.get("lender"),
                 "rate" : quote.get("rate"),
+                "apr" : quote.get("apr"),
                 "ltv" : program.get("ltv"),
                 "points_credits" : quote.get("points_credits"),
                 "interest_only" : program.get("interest_only"),
@@ -94,6 +91,14 @@ def dscr_pricing(z_list=None):
             driver.quit()
         except Exception as qe:
             log(f"Error quitting driver: {qe}")
+
+    finish = datetime.now()
+    log(f"{finish}  Finish DSCR pricing")
+    time_diff = finish - start
+    minutes = int(time_diff.total_seconds() / 60)
+    msg = f"Total DSCR records: {count} in {minutes} minutes"
+    log(msg)
+    text_status(msg=msg)
 
     return count, status
 
@@ -228,10 +233,8 @@ def select_best_quote_ai(pricing_data) -> dict:
     return best_choices[0] if best_choices else None
 
 
-def start_selenium():
+def start_selenium_windows():
     # from selenium.webdriver.firefox.options import Options
-
-
     from selenium.webdriver.chrome.options import Options
     options = Options()
     options.add_argument("--disable-gpu")
@@ -241,6 +244,15 @@ def start_selenium():
     options.add_argument("--headless")
     # driver = webdriver.Firefox(options=options)
     driver = webdriver.Chrome(options=options)
+    time.sleep(4)
+    return driver
+
+
+def start_selenium():
+    options = Options()
+    options.add_argument("--headless")
+    service = Service(executable_path="/usr/local/bin/geckodriver")
+    driver = webdriver.Firefox(service=service, options=options)
     time.sleep(4)
     return driver
 
@@ -278,7 +290,6 @@ def main():
     else:
         set_server('remote')
     
-    set_server('local')
     z_list = None
     if args.zips:
         z_list = [int(z.strip()) for z in args.zips.split(",")]

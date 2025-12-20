@@ -22,7 +22,7 @@ workflow_status = {
     'completed_at': None
 }
 
-EXPORT_ROOT = Path("C:/LOCAL_PROJECTS/RateReadyRealtor/archive")
+EXPORT_ROOT = Path("C:/LOCAL_PROJECTS/RateReadyRealtor/RRR_LOGS/archive")
 
 
 def update_status(task_name, message, error=False):

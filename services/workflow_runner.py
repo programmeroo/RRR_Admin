@@ -6,7 +6,7 @@ Runs multi-step workflows like the TKinter app
 from services import database_access as api
 from services import process_listings, scrape_homes, scrape_pricing, dscr_pricing
 from services.my_logger import log
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
 import time
@@ -147,49 +147,46 @@ def do_dscr_pricing():
 
 
 def do_archive():
-    """Archive tables to CSV"""
-    update_status("do_archive", "Archiving tables...")
-    try:
-        ts = datetime.now().strftime("%Y%m%d_%H%M")
-        export_dir = EXPORT_ROOT / f"archive_{ts}"
-        export_dir.mkdir(parents=True, exist_ok=True)
-        tables = ["emails", "colisters", "quotes", "listings", "daily_prices"]
-
-        for table in tables:
-            archive_response, status_code = api.archive_table(table=table)
-            count = archive_response.get("count", "unknown")
-            update_status("do_archive", f"Archived {table}: {count} rows")
-
-            get_response, status_code = api.get_archive(table=table)
-            if status_code == 200 and get_response:
-                df = pd.DataFrame(get_response) if isinstance(get_response, list) else pd.DataFrame([get_response])
-                if not df.empty:
-                    file_path = export_dir / f"{table}_{ts}.csv"
-                    df.to_csv(file_path, index=False)
-
-        update_status("do_archive", f"Archive completed: {export_dir}")
-        return True
-    except Exception as e:
-        update_status("do_archive", f"Error: {str(e)}", error=True)
+    archive_response, status_code = api.archive_listings()
+    if status_code != 200:
+        update_status("do_archive", f"❌ Error archive_listings: HTTP {status_code}", error=True)
+        update_status("do_archive", f"❌ Archive_listings: Failed to mark (HTTP {status_code})")
         return False
+    marked_count = archive_response.get("count", 0)
+    update_status("do_archive", f"Archive listings: {marked_count} rows")
+    return True
 
 
 def do_clean_up():
     """Delete archived records from database"""
     update_status("do_clean_up", "Cleaning up archived records...")
     try:
-        current_date = datetime.now()
-        api.purge_api_log(before=current_date.strftime("%Y-%m-%d"))
+        # Purge API logs and old web logs
+        before_date  = datetime.now() - timedelta(days=30)
+        api_purge_response, status_code = api.purge_api_log(log="api_log")
+        if status_code == 200:
+            update_status("do_clean_up", f"API Logs: {api_purge_response}")
+        else:
+            update_status("do_clean_up", f"Error purging API logs: HTTP {status_code}", error=True)
 
-        for table in ["daily_prices", "listings", "quotes"]:
-            response, status_code = api.delete_archive(table)
-            update_status("do_clean_up", f"Deleted {table} archive")
+        web_purge_response, status_code = api.purge_api_log(before=before_date.strftime("%Y-%m-%d"))
+        if status_code == 200:
+            update_status("do_clean_up", f"Purged Web Logs: {web_purge_response} before {before_date.strftime("%Y-%m-%d")}")
+        else:
+            update_status("do_clean_up", f"Error purging API logs: HTTP {status_code}", error=True)
 
-        update_status("do_clean_up", "Cleanup completed")
-        return True
+        # Delete archived records for each table
+        deleted_count, status_code = api.delete_archives()
+        if status_code == 200:
+            update_status("do_clean_up", f"Purge Listings and related records: {deleted_count}")
+            return True
+        else:
+            update_status("do_clean_up", f"Error purging Listings and related records: HTTP {status_code}", error=True)
+
     except Exception as e:
-        update_status("do_clean_up", f"Error: {str(e)}", error=True)
-        return False
+        update_status("do_clean_up", f"❌ Error: {str(e)}", error=True)
+
+    return False
 
 
 def send_email_batches(debug=False, dscr=False, batch_size=25):

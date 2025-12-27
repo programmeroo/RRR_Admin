@@ -135,13 +135,12 @@ def add_quote_dict(params_dict=None):
     return _request("POST", "quote", json=params)
 
 
-def archive_table(table=None, days_old=None):
-    params = {"days": days_old}
-    return _request("POST", f"archive/{table}", json=params)
+def archive_listings():
+    return _request("POST", f"archive/listings")
 
 
-def delete_archive(table):
-    return _request("REMOVE", f"archive/{table}")
+def delete_archives():
+    return _request("REMOVE", f"archives")
 
 
 def get_ami_first(city_state=None):
@@ -162,8 +161,19 @@ def get_api_logs_summary():
     return _request("GET", "api_logs_summary", params=None)
 
 
-def get_archive(table=None):
-    return _request("GET", f"archive/{table}", params=None)
+def get_archive(table=None, page=1, per_page=1000, **kwargs):
+    """
+    Get archived records with pagination.
+
+    Args:
+        table: Table name
+        page: Page number (default 1)
+        per_page: Records per page (default 1000)
+        **kwargs: Additional parameters (e.g., mls_numbers for listing-related tables)
+    """
+    params = {"page": page, "per_page": per_page}
+    params.update(kwargs)
+    return _request("GET", f"archive/{table}", params=params)
 
 
 def get_conforming_limit(zipcode=None, normalized_type=None):
@@ -251,8 +261,8 @@ def get_web_log(**kwargs):
     return _request("GET", "web_log", params=params)
 
 
-def purge_api_log(before):
-    return _request("REMOVE", "api_log", params={"before": before})
+def purge_api_log(log="api_log", before=""):
+    return _request("REMOVE", "appi_log", params={"log":log, "before": before})
 
    
 def return_response(function, response):

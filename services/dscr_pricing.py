@@ -4,6 +4,7 @@ import re
 from decimal import Decimal
 from datetime import datetime
 from services.my_logger import log
+from services.my_logger import log
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
@@ -42,10 +43,16 @@ def dscr_pricing(z_list=None):
     log(f"{start}  Start DSCR pricing")
     count = 0
 
-    dscr_programs = [
+    orig_dscr_programs = [
         { "program": "house_80", "listing_type": "house", "ltv": 80, "interest_only": False, "url": house_80, "quote": None },
         { "program": "house_75", "listing_type": "house", "ltv": 75, "interest_only": False, "url": house_75, "quote": None},
         { "program": "house_75_io", "listing_type": "house", "ltv": 75, "interest_only": True, "url": house_75_io, "quote": None},
+        { "program": "condo_80", "listing_type": "condo", "ltv": 80, "interest_only": False, "url": condo_80, "quote": None},
+        { "program": "condo_75", "listing_type": "condo", "ltv": 75, "interest_only": False, "url": condo_75, "quote": None},
+        { "program": "condo_75_io", "listing_type": "condo", "ltv": 75, "interest_only": True, "url": condo_75_io, "quote": None},        
+    ]
+
+    dscr_programs = [
         { "program": "condo_80", "listing_type": "condo", "ltv": 80, "interest_only": False, "url": condo_80, "quote": None},
         { "program": "condo_75", "listing_type": "condo", "ltv": 75, "interest_only": False, "url": condo_75, "quote": None},
         { "program": "condo_75_io", "listing_type": "condo", "ltv": 75, "interest_only": True, "url": condo_75_io, "quote": None},        

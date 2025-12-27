@@ -180,7 +180,6 @@ def dscr_pricing():
 
 @workflow_bp.route('/archive', methods=['POST'])
 def archive():
-    """Archive tables to CSV"""
     try:
         result = runner.do_archive()
         log(f'Archive completed - {"success" if result else "warning"} - check status for details')

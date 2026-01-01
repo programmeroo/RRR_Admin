@@ -62,6 +62,8 @@ def run_workflow(workflow_name):
 
     # Select workflow
     workflows = {
+        'main': runner.WORKFLOW_MAIN,
+        'reports': runner.WORKFLOW_REPORTS,
         'qm': runner.WORKFLOW_QM,
         'quote_email': runner.WORKFLOW_QUOTE_EMAIL,
         'dscr': runner.WORKFLOW_DSCR,
@@ -202,4 +204,34 @@ def cleanup():
         log(f'Cleanup completed - {"success" if result else "warning"} - check status for details')
     except Exception as e:
         log(f'Error: {str(e)}')
+    return redirect(url_for('workflow.index'))
+
+
+@workflow_bp.route('/send-affordability-emails', methods=['POST'])
+def send_affordability_emails():
+    """Send affordability report emails via API"""
+    try:
+        # Call the API endpoint to send affordability emails
+        response, status_code = api.add_affordability_emails()
+        if status_code in [200, 201]:
+            log(f'Affordability emails sent - check status for details')
+        else:
+            log(f'Error sending affordability emails: {response}', 'danger')
+    except Exception as e:
+        log(f'Error: {str(e)}', 'danger')
+    return redirect(url_for('workflow.index'))
+
+
+@workflow_bp.route('/send-followup-emails', methods=['POST'])
+def send_followup_emails():
+    """Send follow-up emails via API"""
+    try:
+        # Call the API endpoint to send follow-up emails
+        response, status_code = api.add_followup_emails()
+        if status_code in [200, 201]:
+            log(f'Follow-up emails sent - check status for details')
+        else:
+            log(f'Error sending follow-up emails: {response}', 'danger')
+    except Exception as e:
+        log(f'Error: {str(e)}', 'danger')
     return redirect(url_for('workflow.index'))

@@ -1,0 +1,141 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Suspicious Activity{% endblock %}
+{% block page_title %}Suspicious Activity Monitor{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-shield-exclamation text-danger me-2"></i> Potential Security Threats
+    </h5>
+    <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="glass-card p-3 text-center">
+        <h3 class="fw-bold text-danger mb-1">{{ stats.high_frequency_ips }}</h3>
+        <p class="text-muted small mb-0">High-Frequency IPs</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass-card p-3 text-center">
+        <h3 class="fw-bold text-warning mb-1">{{ stats.failed_attempts }}</h3>
+        <p class="text-muted small mb-0">Failed Access Attempts</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass-card p-3 text-center">
+        <h3 class="fw-bold text-info mb-1">{{ stats.unique_ips }}</h3>
+        <p class="text-muted small mb-0">Unique IP Addresses</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- High Frequency IPs -->
+  <div class="col-lg-6">
+    <div class="glass-panel p-4">
+      <h6 class="text-white mb-3">
+        <i class="bi bi-exclamation-triangle text-warning me-2"></i> High Activity IPs (Last 24h)
+      </h6>
+      {% if high_frequency_ips %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Requests</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ip_data in high_frequency_ips[:10] %}
+            <tr>
+              <td class="text-white font-monospace">{{ ip_data.ip_address }}</td>
+              <td>
+                <span class="badge {% if ip_data.count > 100 %}bg-danger{% elif ip_data.count > 50 %}bg-warning{% else %}bg-info{% endif %}">
+                  {{ ip_data.count }} requests
+                </span>
+              </td>
+              <td class="text-muted small">{{ ip_data.last_seen }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No high-frequency activity detected.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Suspicious Activities -->
+  <div class="col-lg-6">
+    <div class="glass-panel p-4">
+      <h6 class="text-white mb-3">
+        <i class="bi bi-eye-slash text-danger me-2"></i> Recent Suspicious Activity
+      </h6>
+      {% if suspicious_activities %}
+      <div class="list-group list-group-flush bg-transparent">
+        {% for activity in suspicious_activities[:10] %}
+        <div class="list-group-item bg-transparent border-secondary border-opacity-25 text-white">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 me-2">
+                {{ activity.activity_type if activity.activity_type else 'Unknown' }}
+              </span>
+              <span class="text-white small">{{ activity.action if activity.action else 'N/A' }}</span>
+            </div>
+            <small class="text-muted">{{ activity.created }}</small>
+          </div>
+          <div class="mt-2 small">
+            <span class="text-muted">IP:</span> <span class="font-monospace text-white">{{ activity.ip_address }}</span>
+            {% if activity.email or activity.email_address %}
+            <span class="text-muted ms-3">Email:</span> <span class="text-white">{{ activity.email_address if activity.email_address else activity.email }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No suspicious activity detected.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="glass-panel p-4 mt-4">
+  <h6 class="text-white mb-3">
+    <i class="bi bi-info-circle me-2"></i> Detection Criteria
+  </h6>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="text-muted small">
+        <strong class="text-white">High-Frequency IPs:</strong>
+        <ul class="mb-0 mt-2">
+          <li>More than 50 requests from a single IP in 24 hours</li>
+          <li>Rapid successive requests (potential scraping)</li>
+          <li>Unusual traffic patterns</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="text-muted small">
+        <strong class="text-white">Suspicious Activities:</strong>
+        <ul class="mb-0 mt-2">
+          <li>Multiple failed authentication attempts</li>
+          <li>Access to restricted endpoints</li>
+          <li>Abnormal user agent strings</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

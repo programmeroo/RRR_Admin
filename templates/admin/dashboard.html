@@ -152,54 +152,78 @@
       <h5 class="mb-4 d-flex align-items-center gap-2">
         <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions
       </h5>
-      
+
       <div class="row g-3">
         <div class="col-md-6">
           <a href="{{ url_for('workflow.index') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
             <div class="rounded bg-primary bg-opacity-20 p-3 text-primary">
-              <i class="bi bi-play-circle-fill fs-4"></i>
+              <i class="bi bi-diagram-3-fill fs-4"></i>
             </div>
             <div>
-              <h6 class="mb-1 text-white">Run Workflows</h6>
-              <p class="mb-0 text-muted small">Execute scraping, pricing, and email tasks</p>
+              <h6 class="mb-1 text-white">Workflows</h6>
+              <p class="mb-0 text-muted small">Main & Weekly Reports</p>
             </div>
           </a>
         </div>
-        
-        <div class="col-md-6">
-          <a href="{{ url_for('admin.visitor_activity') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
-            <div class="rounded bg-info bg-opacity-20 p-3 text-info">
-              <i class="bi bi-graph-up-arrow fs-4"></i>
-            </div>
-            <div>
-              <h6 class="mb-1 text-white">View Activity</h6>
-              <p class="mb-0 text-muted small">Analyze user behavior and flyer prints</p>
-            </div>
-          </a>
-        </div>
-        
+
         <div class="col-md-6">
           <a href="{{ url_for('admin.listings') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
             <div class="rounded bg-success bg-opacity-20 p-3 text-success">
               <i class="bi bi-house-gear-fill fs-4"></i>
             </div>
             <div>
-              <h6 class="mb-1 text-white">Manage Listings</h6>
-              <p class="mb-0 text-muted small">View and edit property listings</p>
+              <h6 class="mb-1 text-white">Listings</h6>
+              <p class="mb-0 text-muted small">View and manage properties</p>
             </div>
           </a>
         </div>
-        
+
+        <div class="col-md-6">
+          <a href="{{ url_for('admin.daily_prices') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-warning bg-opacity-20 p-3 text-warning">
+              <i class="bi bi-currency-dollar fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">Daily Prices</h6>
+              <p class="mb-0 text-muted small">QM loan rates</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="{{ url_for('admin.dscr_prices') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-info bg-opacity-20 p-3 text-info">
+              <i class="bi bi-building fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">DSCR Prices</h6>
+              <p class="mb-0 text-muted small">Investor loan rates</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="{{ url_for('admin.visitor_activity') }}" class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none h-100">
+            <div class="rounded bg-secondary bg-opacity-20 p-3 text-secondary">
+              <i class="bi bi-graph-up-arrow fs-4"></i>
+            </div>
+            <div>
+              <h6 class="mb-1 text-white">User Activity</h6>
+              <p class="mb-0 text-muted small">Analytics & flyer prints</p>
+            </div>
+          </a>
+        </div>
+
         <div class="col-md-6">
            <!-- API Switcher Form embedded as a card -->
            <form method="POST" action="{{ url_for('admin.switch_api') }}" class="h-100">
-            <button type="submit" name="api_mode" value="{% if current_api_mode == 'local' %}remote{% else %}local{% endif %}" 
+            <button type="submit" name="api_mode" value="{% if current_api_mode == 'local' %}remote{% else %}local{% endif %}"
                     class="glass-card p-3 d-flex align-items-center gap-3 text-decoration-none w-100 border-0 text-start">
               <div class="rounded bg-danger bg-opacity-20 p-3 text-danger">
                 <i class="bi bi-arrow-repeat fs-4"></i>
               </div>
               <div>
-                <h6 class="mb-1 text-white">Switch API Server</h6>
+                <h6 class="mb-1 text-white">Switch API</h6>
                 <p class="mb-0 text-muted small">
                   Current: <span class="text-white fw-bold">{{ current_api_mode|upper }}</span>
                 </p>

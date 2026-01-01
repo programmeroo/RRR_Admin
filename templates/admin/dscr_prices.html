@@ -1,0 +1,68 @@
+{% extends "admin/base.html" %}
+
+{% block title %}DSCR Prices{% endblock %}
+{% block page_title %}DSCR Pricing Data{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-building text-info me-2"></i> DSCR Prices (Investor Loans)
+    </h5>
+    <form method="GET" class="d-flex">
+      <select name="county" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+        <option value="99999" {% if county==99999 %}selected{% endif %}>All Counties</option>
+        <option value="90620" {% if county==90620 %}selected{% endif %}>Orange</option>
+        <option value="91901" {% if county==91901 %}selected{% endif %}>San Diego</option>
+        <option value="91708" {% if county==91708 %}selected{% endif %}>Riverside</option>
+        <option value="90001" {% if county==90001 %}selected{% endif %}>Los Angeles</option>
+        <option value="91319" {% if county==91319 %}selected{% endif %}>Ventura</option>
+        <option value="91701" {% if county==91701 %}selected{% endif %}>San Bernardino</option>
+        <option value="96701" {% if county==96701 %}selected{% endif %}>Honolulu</option>
+        <option value="96703" {% if county==96703 %}selected{% endif %}>Kauai</option>
+        <option value="96708" {% if county==96708 %}selected{% endif %}>Maui</option>
+        <option value="96704" {% if county==96704 %}selected{% endif %}>Hawaii</option>
+      </select>
+    </form>
+  </div>
+
+  {% if prices %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>County</th>
+          <th>Listing Type</th>
+          <th>LTV</th>
+          <th>Rate</th>
+          <th>APR</th>
+          <th>Points/Credits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for price in prices %}
+        <tr>
+          <td><small class="text-muted">{{ price.price_date_only if price.price_date_only else 'N/A' }}</small></td>
+          <td class="text-white">{{ price.county }}</td>
+          <td class="text-white">{{ price.listing_type }}</td>
+          <td><span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25">{{ price.ltv }}%</span></td>
+          <td class="text-white fw-bold">{{ "%.3f"|format(price.rate) }}%</td>
+          <td class="text-muted">{{ "%.3f"|format(price.apr) }}%</td>
+          <td>{{ "%.0f"|format(price.points_credits) if price.points_credits else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info d-flex align-items-center gap-2">
+    <i class="bi bi-info-circle-fill"></i>
+    No DSCR prices found.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -37,8 +37,7 @@ def set_server(use_server="local"):
         SERVER_DB = LOCAL_DB
     else:
         SERVER_DB = REMOTE_DB
-    # lo
-    # g(f"Using SERVER_DB: {SERVER_DB}")
+    # log(f"Using SERVER_DB: {SERVER_DB}")
 
 
 def _request(method, endpoint, **kwargs):
@@ -96,6 +95,11 @@ def add_affordability_reports(**kwargs):
     return _request("POST", "affordability_reports", json=params)
 
 
+def add_followup_emails(**kwargs):
+    params = {key: to_json_serializable(value) for key, value in kwargs.items()}
+    return _request("POST", "followup_emails", json=params)
+
+
 def add_daily_price(**kwargs):
     params = {key: to_json_serializable(value) for key, value in kwargs.items()}
     return _request("POST", "daily_price", json=params)
@@ -147,8 +151,9 @@ def get_ami_first(city_state=None):
     return _request("GET", "ami_first", params={"city_state": city_state})
 
 
-def get_activities(page=1, per_page=100):
+def get_activities(page=1, per_page=100, **kwargs):
     params = {"page": page, "per_page": per_page}
+    params.update({key: to_json_serializable(value) for key, value in kwargs.items()})
     return _request("GET", "activities", params=params)
 
 
@@ -263,6 +268,12 @@ def get_web_log(**kwargs):
 
 def purge_api_log(log="api_log", before=""):
     return _request("REMOVE", "appi_log", params={"log":log, "before": before})
+
+
+# debug=False, max_send=25, week=0
+def run_reports(**kwargs):
+    params = {key: to_json_serializable(value) for key, value in kwargs.items()}
+    return _request("POST", "report/run", json=params)
 
    
 def return_response(function, response):

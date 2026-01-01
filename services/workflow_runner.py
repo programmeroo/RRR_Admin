@@ -265,17 +265,40 @@ def run_workflow(workflow, **kwargs):
     return True
 
 
-# Predefined workflows (like in TKinter app)
+# Predefined workflows
+
+# Main Workflow: Data Pipeline (Insert & Process Listings, Maintain Database)
+WORKFLOW_MAIN = [
+    do_scrape,
+    do_process_pages,
+    do_archive,
+    do_clean_up
+]
+
+# Weekly Reports Workflow: 4-Week Email Campaign
+WORKFLOW_REPORTS = [
+    do_pricing,        # Update pricing first
+    do_quote,          # Week 1: QM Quotes
+    do_email,          # Week 1: Send QM Emails
+    do_dscr_pricing,   # Week 3: DSCR Pricing
+    do_dscr_quote,     # Week 3: DSCR Quotes
+    do_dscr_email,     # Week 3: Send DSCR Emails
+    # Week 2 (Affordability) and Week 4 (Follow-up) handled by API report processor
+]
+
+# Legacy workflows (for backwards compatibility)
 WORKFLOW_QM = [
     do_scrape,
     do_process_pages,
     do_quote,
     do_email,
+    do_archive,
+    do_clean_up
 ]
 
 WORKFLOW_QUOTE_EMAIL = [
-    do_archive,
-    do_clean_up
+    do_quote,
+    do_email,
 ]
 
 WORKFLOW_DSCR = [

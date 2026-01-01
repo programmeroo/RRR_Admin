@@ -77,14 +77,40 @@
           <i class="bi bi-currency-dollar"></i> Daily Prices
         </a>
 
+        <a href="{{ url_for('admin.dscr_prices') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.dscr_prices' %}active{% endif %}">
+          <i class="bi bi-building"></i> DSCR Prices
+        </a>
+
+        <div class="nav-section-title">User Management</div>
+
+        <a href="{{ url_for('admin.unsubscribe_user') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.unsubscribe_user' %}active{% endif %}">
+          <i class="bi bi-person-x"></i> Unsubscribe User
+        </a>
+
+        <a href="{{ url_for('admin.user_activity_detail') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.user_activity_detail' %}active{% endif %}">
+          <i class="bi bi-activity"></i> User Activity
+        </a>
+
+        <div class="nav-section-title">Security</div>
+
+        <a href="{{ url_for('admin.suspicious_activity') }}"
+           class="admin-nav-link {% if request.endpoint == 'admin.suspicious_activity' %}active{% endif %}">
+          <i class="bi bi-shield-exclamation"></i> Suspicious Activity
+        </a>
+
+        <div class="nav-section-title">System</div>
+
         <a href="{{ url_for('admin.api_logs') }}"
            class="admin-nav-link {% if request.endpoint == 'admin.api-logs' %}active{% endif %}">
-          <i class="bi bi-currency-dollar"></i> API Logs
+          <i class="bi bi-file-text"></i> API Logs
         </a>
 
         <a href="{{ url_for('admin.web_logs') }}"
            class="admin-nav-link {% if request.endpoint == 'admin.web-logs' %}active{% endif %}">
-          <i class="bi bi-currency-dollar"></i> WEB Logs
+          <i class="bi bi-globe"></i> Web Logs
         </a>
       </div>
     </nav>

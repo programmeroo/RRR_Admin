@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Unsubscribe User{% endblock %}
+{% block page_title %}Unsubscribe User{% endblock %}
+
+{% block content %}
+
+<div class="glass-panel p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 text-white">
+      <i class="bi bi-person-x-fill text-danger me-2"></i> Unsubscribe User from Email List
+    </h5>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="glass-card p-4">
+        <form method="POST" action="{{ url_for('admin.unsubscribe_user') }}">
+          <div class="mb-3">
+            <label for="email" class="form-label text-white">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" required
+                   placeholder="user@example.com">
+            <div class="form-text text-muted">Enter the email address to unsubscribe from all mailings.</div>
+          </div>
+
+          <div class="alert alert-warning bg-opacity-10 border-warning border-opacity-25 text-warning">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Warning:</strong> This action will unsubscribe the user from all future emails. They will no longer receive quote updates or marketing materials.
+          </div>
+
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-person-x me-2"></i> Unsubscribe User
+          </button>
+          <a href="{{ url_for('admin.contacts') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i> Back to Contacts
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="glass-card p-4">
+        <h6 class="text-white mb-3">
+          <i class="bi bi-info-circle me-2"></i> About Unsubscribing
+        </h6>
+        <div class="text-muted small">
+          <p>When you unsubscribe a user:</p>
+          <ul>
+            <li>They will be marked as unsubscribed in the database</li>
+            <li>No future emails will be sent to this address</li>
+            <li>Their contact record will remain in the system for compliance</li>
+            <li>They can be manually resubscribed if needed</li>
+          </ul>
+          <p class="mb-0 mt-3"><strong>Note:</strong> This is typically used for manual unsubscribe requests or compliance purposes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

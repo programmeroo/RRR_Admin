@@ -154,7 +154,7 @@
         <i class="bi bi-calendar-week-fill text-success"></i> Weekly Reports
       </h5>
 
-      <form method="POST" action="{{ url_for('workflow.run_workflow', workflow_name='reports') }}" class="h-100 d-flex flex-column">
+      <form method="POST" action="{{ url_for('workflow.run_reports') }}" class="h-100 d-flex flex-column">
         <div class="glass-card p-4 flex-grow-1 d-flex flex-column">
           <div class="d-flex align-items-center gap-3 mb-3">
             <div class="rounded bg-success bg-opacity-20 p-3 text-success">
@@ -185,6 +185,14 @@
                 <span class="text-white small"><strong>Week 4:</strong> Follow-up Emails</span>
               </div>
             </div>
+
+            <select name="week" class="form-select form-select-sm mb-2">
+              <option value="">All Weeks (Default)</option>
+              <option value="1">Week 1: QM Quotes</option>
+              <option value="2">Week 2: Affordability</option>
+              <option value="3">Week 3: DSCR Quotes</option>
+              <option value="4">Week 4: Follow-up</option>
+            </select>
 
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" name="debug" id="debug_reports" value="true">

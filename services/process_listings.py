@@ -211,9 +211,7 @@ def process_pages():
 
     for file_name in page_list:
         success = process_page(file_name)
-        if success:
-            move_to_processed(file_name)
-        else:
+        if not success:
             move_to_failed(file_name)
 
 

@@ -64,7 +64,7 @@ def do_scrape():
     """Copy HTML files from Downloads"""
     update_status("do_scrape", "Scraping HTML files from Downloads...")
     try:
-        count = scrape_homes.scrape()
+        count = scrape_homes.do_scrape_listings()
         update_status("do_scrape", f"Scraped {count} files")
         return True
     except Exception as e:
@@ -76,7 +76,7 @@ def do_process_pages():
     """Process HTML listings"""
     update_status("do_process_pages", "Processing listing HTML files...")
     try:
-        result = process_listings.process_files()
+        result = process_listings.process_pages()
         update_status("do_process_pages", f"Processed listings: {result}")
         return True
     except Exception as e:
@@ -160,33 +160,38 @@ def do_archive():
 def do_clean_up():
     """Delete archived records from database"""
     update_status("do_clean_up", "Cleaning up archived records...")
-    try:
-        # Purge API logs and old web logs
-        before_date  = datetime.now() - timedelta(days=30)
-        api_purge_response, status_code = api.purge_api_log(log="api_log")
-        if status_code == 200:
-            update_status("do_clean_up", f"API Logs: {api_purge_response}")
-        else:
-            update_status("do_clean_up", f"Error purging API logs: HTTP {status_code}", error=True)
+    success = True
 
-        web_purge_response, status_code = api.purge_api_log(before=before_date.strftime("%Y-%m-%d"))
-        if status_code == 200:
-            update_status("do_clean_up", f"Purged Web Logs: {web_purge_response} before {before_date.strftime("%Y-%m-%d")}")
-        else:
-            update_status("do_clean_up", f"Error purging API logs: HTTP {status_code}", error=True)
+    try:
+        # Purge API logs (optional - may not be implemented on server)
+        before_date = datetime.now() - timedelta(days=30)
+        try:
+            api_purge_response, status_code = api.purge_api_log(log="api_log", before=before_date.strftime("%Y-%m-%d"))
+            if status_code == 200:
+                update_status("do_clean_up", f"Purged API Logs: {api_purge_response}")
+            else:
+                update_status("do_clean_up", f"API log purge not available (HTTP {status_code}) - skipping")
+        except Exception as e:
+            update_status("do_clean_up", f"API log purge not available - skipping")
 
         # Delete archived records for each table
-        deleted_count, status_code = api.delete_archives()
-        if status_code == 200:
-            update_status("do_clean_up", f"Purge Listings and related records: {deleted_count}")
-            return True
-        else:
-            update_status("do_clean_up", f"Error purging Listings and related records: HTTP {status_code}", error=True)
+        try:
+            deleted_count, status_code = api.delete_archives()
+            if status_code == 200:
+                update_status("do_clean_up", f"Purged archived records: {deleted_count}")
+            elif status_code == 404:
+                update_status("do_clean_up", "Archive deletion not available on server - skipping")
+            else:
+                update_status("do_clean_up", f"Warning: Archive deletion returned HTTP {status_code}")
+                success = False
+        except Exception as e:
+            update_status("do_clean_up", f"Archive deletion not available - skipping")
+
+        return success
 
     except Exception as e:
-        update_status("do_clean_up", f"❌ Error: {str(e)}", error=True)
-
-    return False
+        update_status("do_clean_up", f"Error: {str(e)}", error=True)
+        return False
 
 
 def send_email_batches(debug=False, dscr=False, batch_size=25):
@@ -275,16 +280,9 @@ WORKFLOW_MAIN = [
     do_clean_up
 ]
 
-# Weekly Reports Workflow: 4-Week Email Campaign
-WORKFLOW_REPORTS = [
-    do_pricing,        # Update pricing first
-    do_quote,          # Week 1: QM Quotes
-    do_email,          # Week 1: Send QM Emails
-    do_dscr_pricing,   # Week 3: DSCR Pricing
-    do_dscr_quote,     # Week 3: DSCR Quotes
-    do_dscr_email,     # Week 3: Send DSCR Emails
-    # Week 2 (Affordability) and Week 4 (Follow-up) handled by API report processor
-]
+# Weekly Reports Workflow: Handled by API endpoint /api/report/run
+# See workflow_routes.py run_reports() which calls api.run_reports()
+# Supports: week parameter (1-4 or empty for all), debug mode
 
 # Legacy workflows (for backwards compatibility)
 WORKFLOW_QM = [

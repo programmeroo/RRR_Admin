@@ -21,16 +21,26 @@ def index():
     """Workflow management page"""
     current_api_mode = session.get('api_mode', 'local')
 
-    # Get workflow status/counts via API
-    new_listings, _ = api.get_listings(status='new')
-    quoted_listings, _ = api.get_listings(status='quoted')
-    dscr_quoted_listings, _ = api.get_listings(status='dscr_quoted')
+    # Get workflow status/counts via single API call
+    summary, status_code = api.get_listings_summary()
 
     workflow_stats = {
-        'new_listings': len(new_listings) if isinstance(new_listings, list) else 0,
-        'listings_quoted': len(quoted_listings) if isinstance(quoted_listings, list) else 0,
-        'listings_dscr_quoted': len(dscr_quoted_listings) if isinstance(dscr_quoted_listings, list) else 0,
+        'new_listings': 0,
+        'listings_quoted': 0,
+        'listings_dscr_quoted': 0,
     }
+
+    if status_code == 200 and isinstance(summary, list):
+        # Convert list of {'status': 'new', 'count': 5} to dict lookup
+        for item in summary:
+            status_name = item.get('status', '')
+            count = item.get('count', 0)
+            if status_name == 'new':
+                workflow_stats['new_listings'] = count
+            elif status_name == 'qm_quoted':
+                workflow_stats['listings_quoted'] = count
+            elif status_name == 'dscr_quoted':
+                workflow_stats['listings_dscr_quoted'] = count
 
     # Get current workflow status
     status = runner.get_workflow_status()
@@ -63,7 +73,6 @@ def run_workflow(workflow_name):
     # Select workflow
     workflows = {
         'main': runner.WORKFLOW_MAIN,
-        'reports': runner.WORKFLOW_REPORTS,
         'qm': runner.WORKFLOW_QM,
         'quote_email': runner.WORKFLOW_QUOTE_EMAIL,
         'dscr': runner.WORKFLOW_DSCR,
@@ -234,4 +243,33 @@ def send_followup_emails():
             log(f'Error sending follow-up emails: {response}', 'danger')
     except Exception as e:
         log(f'Error: {str(e)}', 'danger')
+    return redirect(url_for('workflow.index'))
+
+
+@workflow_bp.route('/run-reports', methods=['POST'])
+def run_reports():
+    """Run weekly reports workflow (all weeks or specific week)"""
+    week = request.form.get('week', '').strip()
+    debug = request.form.get('debug', 'false') == 'true'
+
+    try:
+        # Build parameters for API call
+        params = {}
+        if week:
+            params['week'] = int(week)
+        if debug:
+            params['debug'] = True
+
+        # Call the unified report processor API endpoint
+        response, status_code = api.run_reports(**params)
+
+        if status_code in [200, 201]:
+            week_text = f"Week {week}" if week else "All Weeks"
+            debug_text = " (debug mode)" if debug else ""
+            log(f'✅ Weekly Reports started: {week_text}{debug_text}', 'success')
+        else:
+            log(f'Error running reports: {response}', 'danger')
+    except Exception as e:
+        log(f'Error: {str(e)}', 'danger')
+
     return redirect(url_for('workflow.index'))

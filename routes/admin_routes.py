@@ -231,7 +231,7 @@ def dashboard():
                 rates[loan_type_map[loan_type]] = rate_value
 
     # Get flyer printers count
-    all_activities, _ = api.get_activities(page=1, per_page=50)
+    all_activities, _ = api.get_activities(page=1, per_page=5000, action_like='print_flyer%')
 
     # Handle pagination format and count unique emails
     flyer_printers_count = 0
@@ -305,8 +305,8 @@ def user_print_activity():
         log(f'Error extracting activities: {result}', 'danger')
 
     """View users who printed flyers from the website"""
-    # Get all activities and filter for print_flyer actions
-    all_activities, status_code = api.get_activities(page=1, per_page=50)
+    # Get all activities where contact_id > 2 (exclude system/test contacts)
+    all_activities, status_code = api.get_activities(page=1, per_page=5000, contact_id_gt=2)
     if status_code != 200:
         log(f'Error loading activities: {all_activities}', 'danger')
         activities = []
@@ -358,7 +358,8 @@ def user_print_activity():
 
 @admin_bp.route('/visitor-activity')
 def visitor_activity():
-    all_activities, status_code = api.get_activities(page=1, per_page=50)
+    # Get all activities where contact_id > 2 (exclude system/test contacts)
+    all_activities, status_code = api.get_activities(page=1, per_page=5000, contact_id_gt=2)
     if status_code != 200:
         log(f'Error loading activities: {all_activities}', 'danger')
         activities = []
@@ -411,8 +412,8 @@ def visitor_activity():
 @admin_bp.route('/export-visitor-activity')
 def export_visitor_activity():
     """Export user activity to CSV"""
-    # Get all activities and filter for print_flyer actions
-    all_activities, status_code = api.get_activities(page=1, per_page=50)
+    # Get all activities where contact_id > 2 (exclude system/test contacts)
+    all_activities, status_code = api.get_activities(page=1, per_page=5000, contact_id_gt=2)
 
     if status_code != 200:
         log(f'Error loading activities for export: {all_activities}', 'danger')
@@ -488,8 +489,8 @@ def export_visitor_activity():
 @admin_bp.route('/export-print-activity')
 def export_print_activity():
     """Export user activity to CSV"""
-    # Get all activities and filter for print_flyer actions
-    all_activities, status_code = api.get_activities(activity_type="print_flyer")
+    # Get all print flyer activities
+    all_activities, status_code = api.get_activities(page=1, per_page=5000, action_like='print_flyer%')
 
     if status_code != 200:
         log(f'Error loading activities for export: {all_activities}', 'danger')
@@ -583,7 +584,8 @@ def listings():
 
 def _get_flyer_printer_data():
     """Helper to get and filter flyer printer data"""
-    all_activities, status_code = api.get_activities(page=1, per_page=50)
+    # Filter at API level by action pattern (print_flyer_owner, print_flyer_dscr, etc.)
+    all_activities, status_code = api.get_activities(page=1, per_page=5000, action_like='print_flyer%')
 
     if status_code != 200:
         log(f"API error: {all_activities}", 'danger')
@@ -754,26 +756,45 @@ def suspicious_activity():
             ip = log_entry.get('ip_address', 'Unknown')
             ip_counts[ip] = ip_counts.get(ip, 0) + 1
 
-            # Flag suspicious patterns
+            # Flag suspicious patterns - only unauthorized access attempts
             endpoint = log_entry.get('endpoint', '')
             status_code = log_entry.get('status_code', 200)
 
-            # Failed auth attempts, unusual endpoints
-            if status_code in [401, 403, 404] or 'admin' in endpoint or 'api_key' in endpoint:
+            # Only flag failed auth attempts (401/403), not 404s which are common for legitimate API requests
+            if status_code in [401, 403]:
                 suspicious_activities.append({
                     'ip_address': ip,
-                    'activity_type': 'API Access',
-                    'action': f"{log_entry.get('method', 'GET')} {endpoint}",
+                    'activity_type': 'Failed Auth',
+                    'action': f"{log_entry.get('method', 'GET')} {endpoint} ({status_code})",
                     'created': log_entry.get('created', ''),
                     'email': None,
                     'email_address': None
                 })
 
-    # Process web logs
+    # Process web logs - look for WordPress/hacking attempts
+    wordpress_patterns = ['/wp-', 'wp-admin', 'wp-login', 'wp-content', 'wp-includes',
+                         'xmlrpc', 'phpmyadmin', '.env', '.git', 'config.php',
+                         'admin.php', 'install.php', 'setup.php']
+
     if isinstance(web_logs, list):
         for log_entry in web_logs:
             ip = log_entry.get('ip_address', 'Unknown')
             ip_counts[ip] = ip_counts.get(ip, 0) + 1
+
+            # Check for WordPress/hack attempts
+            path = log_entry.get('path', '').lower()
+            status_code = log_entry.get('status_code', 200)
+
+            # Flag any WordPress-related requests or common exploit attempts
+            if any(pattern in path for pattern in wordpress_patterns):
+                suspicious_activities.append({
+                    'ip_address': ip,
+                    'activity_type': 'Hack Attempt',
+                    'action': f"{log_entry.get('method', 'GET')} {path} ({status_code})",
+                    'created': log_entry.get('created', ''),
+                    'email': None,
+                    'email_address': None
+                })
 
     # Identify high-frequency IPs (potential DDoS or scraping)
     high_frequency_ips = [
@@ -788,7 +809,8 @@ def suspicious_activity():
 
     stats = {
         'high_frequency_ips': len(high_frequency_ips),
-        'failed_attempts': len([a for a in suspicious_activities if '401' in str(a) or '403' in str(a)]),
+        'failed_attempts': len([a for a in suspicious_activities if a['activity_type'] == 'Failed Auth']),
+        'hack_attempts': len([a for a in suspicious_activities if a['activity_type'] == 'Hack Attempt']),
         'unique_ips': len(ip_counts)
     }
 

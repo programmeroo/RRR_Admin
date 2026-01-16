@@ -16,19 +16,25 @@
   </div>
 
   <div class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="glass-card p-3 text-center">
-        <h3 class="fw-bold text-danger mb-1">{{ stats.high_frequency_ips }}</h3>
+        <h3 class="fw-bold text-danger mb-1">{{ stats.hack_attempts }}</h3>
+        <p class="text-muted small mb-0">WordPress/Hack Attempts</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="glass-card p-3 text-center">
+        <h3 class="fw-bold text-warning mb-1">{{ stats.failed_attempts }}</h3>
+        <p class="text-muted small mb-0">Failed Auth Attempts</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="glass-card p-3 text-center">
+        <h3 class="fw-bold text-orange mb-1">{{ stats.high_frequency_ips }}</h3>
         <p class="text-muted small mb-0">High-Frequency IPs</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="glass-card p-3 text-center">
-        <h3 class="fw-bold text-warning mb-1">{{ stats.failed_attempts }}</h3>
-        <p class="text-muted small mb-0">Failed Access Attempts</p>
-      </div>
-    </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="glass-card p-3 text-center">
         <h3 class="fw-bold text-info mb-1">{{ stats.unique_ips }}</h3>
         <p class="text-muted small mb-0">Unique IP Addresses</p>
@@ -129,9 +135,10 @@
       <div class="text-muted small">
         <strong class="text-white">Suspicious Activities:</strong>
         <ul class="mb-0 mt-2">
-          <li>Multiple failed authentication attempts</li>
-          <li>Access to restricted endpoints</li>
-          <li>Abnormal user agent strings</li>
+          <li>WordPress/exploit attempts (wp-admin, wp-login, xmlrpc, etc.)</li>
+          <li>Failed authentication attempts (401/403 responses)</li>
+          <li>Access to config files (.env, .git, config.php)</li>
+          <li>Database admin tool attempts (phpmyadmin)</li>
         </ul>
       </div>
     </div>

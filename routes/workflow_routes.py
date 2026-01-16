@@ -273,3 +273,39 @@ def run_reports():
         log(f'Error: {str(e)}', 'danger')
 
     return redirect(url_for('workflow.index'))
+
+
+@workflow_bp.route('/purge-api-logs', methods=['POST'])
+def purge_api_logs():
+    """Purge all API logs"""
+    try:
+        response, status_code = api.purge_api_log(log='api_log', before="")
+
+        if status_code == 200:
+            count = response.get('deleted', 0) if isinstance(response, dict) else 0
+            log(f'✅ Purged {count} API log entries', 'success')
+        else:
+            log(f'Error purging API logs: {response}', 'danger')
+    except Exception as e:
+        log(f'Error purging API logs: {str(e)}', 'danger')
+    return redirect(url_for('workflow.index'))
+
+
+@workflow_bp.route('/purge-web-logs', methods=['POST'])
+def purge_web_logs():
+    """Purge old web logs"""
+    try:
+        # Calculate date 30 days ago
+        from datetime import datetime, timedelta
+        before_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+
+        response, status_code = api.purge_api_log(log='web_log', before=before_date)
+
+        if status_code == 200:
+            count = response.get('deleted', 0) if isinstance(response, dict) else 0
+            log(f'✅ Purged {count} web log entries older than {before_date}', 'success')
+        else:
+            log(f'Error purging web logs: {response}', 'danger')
+    except Exception as e:
+        log(f'Error purging web logs: {str(e)}', 'danger')
+    return redirect(url_for('workflow.index'))

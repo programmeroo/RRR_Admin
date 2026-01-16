@@ -267,7 +267,7 @@ def get_web_log(**kwargs):
 
 
 def purge_api_log(log="api_log", before=""):
-    return _request("REMOVE", "appi_log", params={"log":log, "before": before})
+    return _request("REMOVE", "api_log", params={"log":log, "before": before})
 
 
 # debug=False, max_send=25, week=0
